@@ -1,82 +1,13 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="referrer" content="no-referrer">
-  <title>Bitweb Wallet</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #0b0f14;
-      --panel: #111827;
-      --panel-2: #0f172a;
-      --line: #243041;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --ok: #22c55e;
-      --bad: #ef4444;
-      --info: #38bdf8;
-      --accent: #8b5cf6;
-      --button: #1f2937;
-    }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-    body { min-height: 100vh; }
-    .shell { max-width: 1280px; margin: 0 auto; padding: 20px; }
-    .header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
-    .title { font-size: 28px; font-weight: 800; }
-    .subtitle { color: var(--muted); margin-top: 2px; font-size: 14px; }
-    .card, .panel { background: linear-gradient(180deg, rgba(17,24,39,.98), rgba(15,23,42,.98)); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 10px 24px rgba(0,0,0,.22); }
-    .card { padding: 18px; margin: 14px 0; }
-    .wide { padding-bottom: 22px; }
-    .panel { padding: 16px; }
-    .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    .between { justify-content: space-between; }
-    .stack { display: grid; gap: 12px; }
-    label { display: grid; gap: 7px; font-size: 14px; color: var(--text); }
-    input, select, textarea { width: 100%; border-radius: 12px; border: 1px solid var(--line); background: #0b1220; color: var(--text); padding: 11px 12px; font: inherit; outline: none; }
-    textarea { resize: vertical; }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,92,246,.18); }
-    button { border: 1px solid var(--line); background: var(--button); color: var(--text); border-radius: 12px; padding: 10px 14px; font: inherit; cursor: pointer; }
-    button:hover { filter: brightness(1.06); }
-    button.primary { background: linear-gradient(180deg, #6d28d9, #4c1d95); border-color: rgba(139,92,246,.6); }
-    button:disabled { opacity: .55; cursor: not-allowed; }
-    .pill { border: 1px solid var(--line); background: rgba(255,255,255,.04); border-radius: 999px; padding: 6px 10px; font-size: 12px; color: var(--muted); }
-    .statusbar { display:flex; justify-content:space-between; align-items:center; gap:12px; border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; border:1px solid var(--line); background: rgba(255,255,255,.03); }
-    .statusbar.ok { border-color: rgba(34,197,94,.35); }
-    .statusbar.bad { border-color: rgba(239,68,68,.35); }
-    .statusbar.info { border-color: rgba(56,189,248,.25); }
-    .spinner { color: var(--muted); }
-    .muted { color: var(--muted); }
-    .ok { color: var(--ok); }
-    .bad { color: var(--bad); }
-    .info { color: var(--info); }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
-    .smallbox, .box, .log { background: #0a1120; border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
-    .log { white-space: pre-wrap; min-height: 68px; }
-    .metric { padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.02); }
-    .metric .label { color: var(--muted); font-size: 13px; }
-    .metric .value { font-size: 22px; font-weight: 700; margin-top: 6px; }
-    .tablewrap { overflow:auto; border: 1px solid var(--line); border-radius: 14px; margin-top: 10px; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { border-bottom: 1px solid rgba(255,255,255,.06); padding: 10px 12px; text-align: left; vertical-align: top; }
-    th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: #101726; }
-    tr:hover td { background: rgba(255,255,255,.02); }
-    hr { border: 0; border-top: 1px solid rgba(255,255,255,.08); margin: 18px 0; }
-    details > summary { cursor: pointer; color: var(--muted); }
-    code { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.05); padding: 2px 5px; border-radius: 6px; }
-    .statusline { margin-top: 8px; }
-    @media (max-width: 900px) {
-      .grid2, .grid3 { grid-template-columns: 1fr; }
-      .header { align-items: flex-start; }
-    }
-  </style>
-</head>
-<body>
-  <div id="app"></div>
-  <script src="./app.js"></script>
-</body>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https: wss:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'" />
+    <title>Bitweb Wallet</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="./app.js"></script>
+  </body>
 </html>
