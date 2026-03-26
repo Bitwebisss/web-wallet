@@ -1,0 +1,2316 @@
+(()=>{var Qc=Object.defineProperty;var Jc=(e,t,n)=>t in e?Qc(e,t,{enumerable:!0,configurable:!0,writable:!0,value:n}):e[t]=n;var y=(e,t,n)=>Jc(e,typeof t!="symbol"?t+"":t,n);function Jt(e){return e instanceof Uint8Array||ArrayBuffer.isView(e)&&e.constructor.name==="Uint8Array"}function re(e,t=""){if(!Number.isSafeInteger(e)||e<0){let n=t&&`"${t}" `;throw new Error(`${n}expected integer >= 0, got ${e}`)}}function C(e,t,n=""){let r=Jt(e),o=e?.length,s=t!==void 0;if(!r||s&&o!==t){let i=n&&`"${n}" `,c=s?` of length ${t}`:"",a=r?`length=${o}`:`type=${typeof e}`;throw new Error(i+"expected Uint8Array"+c+", got "+a)}return e}function Rt(e){if(typeof e!="function"||typeof e.create!="function")throw new Error("Hash must wrapped by utils.createHasher");re(e.outputLen),re(e.blockLen)}function Nt(e,t=!0){if(e.destroyed)throw new Error("Hash instance has been destroyed");if(t&&e.finished)throw new Error("Hash#digest() has already been called")}function Ps(e,t){C(e,void 0,"digestInto() output");let n=t.outputLen;if(e.length<n)throw new Error('"digestInto() output" expected to be of length >='+n)}function Ln(e){return new Uint32Array(e.buffer,e.byteOffset,Math.floor(e.byteLength/4))}function xe(...e){for(let t=0;t<e.length;t++)e[t].fill(0)}function ze(e){return new DataView(e.buffer,e.byteOffset,e.byteLength)}function De(e,t){return e<<32-t|e>>>t}function _(e,t){return e<<t|e>>>32-t>>>0}var ea=new Uint8Array(new Uint32Array([287454020]).buffer)[0]===68;function ta(e){return e<<24&4278190080|e<<8&16711680|e>>>8&65280|e>>>24&255}function na(e){for(let t=0;t<e.length;t++)e[t]=ta(e[t]);return e}var Dr=ea?e=>e:na,Is=typeof Uint8Array.from([]).toHex=="function"&&typeof Uint8Array.fromHex=="function",ra=Array.from({length:256},(e,t)=>t.toString(16).padStart(2,"0"));function Me(e){if(C(e),Is)return e.toHex();let t="";for(let n=0;n<e.length;n++)t+=ra[e[n]];return t}var Je={_0:48,_9:57,A:65,F:70,a:97,f:102};function Ts(e){if(e>=Je._0&&e<=Je._9)return e-Je._0;if(e>=Je.A&&e<=Je.F)return e-(Je.A-10);if(e>=Je.a&&e<=Je.f)return e-(Je.a-10)}function et(e){if(typeof e!="string")throw new Error("hex string expected, got "+typeof e);if(Is)return Uint8Array.fromHex(e);let t=e.length,n=t/2;if(t%2)throw new Error("hex string expected, got unpadded hex of length "+t);let r=new Uint8Array(n);for(let o=0,s=0;o<n;o++,s+=2){let i=Ts(e.charCodeAt(s)),c=Ts(e.charCodeAt(s+1));if(i===void 0||c===void 0){let a=e[s]+e[s+1];throw new Error('hex string expected, got non-hex character "'+a+'" at index '+s)}r[o]=i*16+c}return r}var oa=async()=>{};async function $n(e,t,n){let r=Date.now();for(let o=0;o<e;o++){n(o);let s=Date.now()-r;s>=0&&s<t||(await oa(),r+=s)}}function sa(e){if(typeof e!="string")throw new Error("string expected");return new Uint8Array(new TextEncoder().encode(e))}function Mr(e,t=""){return typeof e=="string"?sa(e):C(e,void 0,t)}function ae(...e){let t=0;for(let r=0;r<e.length;r++){let o=e[r];C(o),t+=o.length}let n=new Uint8Array(t);for(let r=0,o=0;r<e.length;r++){let s=e[r];n.set(s,o),o+=s.length}return n}function On(e,t){if(t!==void 0&&{}.toString.call(t)!=="[object Object]")throw new Error("options must be object or undefined");return Object.assign(e,t)}function en(e,t={}){let n=(o,s)=>e(s).update(o).digest(),r=e(void 0);return n.outputLen=r.outputLen,n.blockLen=r.blockLen,n.create=o=>e(o),Object.assign(n,t),Object.freeze(n)}function ut(e=32){let t=typeof globalThis=="object"?globalThis.crypto:null;if(typeof t?.getRandomValues!="function")throw new Error("crypto.getRandomValues must be defined");return t.getRandomValues(new Uint8Array(e))}var Wr=e=>({oid:Uint8Array.from([6,9,96,134,72,1,101,3,4,2,e])});var Cn=class{constructor(t,n){y(this,"oHash");y(this,"iHash");y(this,"blockLen");y(this,"outputLen");y(this,"finished",!1);y(this,"destroyed",!1);if(Rt(t),C(n,void 0,"key"),this.iHash=t.create(),typeof this.iHash.update!="function")throw new Error("Expected instance of class which extends utils.Hash");this.blockLen=this.iHash.blockLen,this.outputLen=this.iHash.outputLen;let r=this.blockLen,o=new Uint8Array(r);o.set(n.length>r?t.create().update(n).digest():n);for(let s=0;s<o.length;s++)o[s]^=54;this.iHash.update(o),this.oHash=t.create();for(let s=0;s<o.length;s++)o[s]^=106;this.oHash.update(o),xe(o)}update(t){return Nt(this),this.iHash.update(t),this}digestInto(t){Nt(this),C(t,this.outputLen,"output"),this.finished=!0,this.iHash.digestInto(t),this.oHash.update(t),this.oHash.digestInto(t),this.destroy()}digest(){let t=new Uint8Array(this.oHash.outputLen);return this.digestInto(t),t}_cloneInto(t){t||(t=Object.create(Object.getPrototypeOf(this),{}));let{oHash:n,iHash:r,finished:o,destroyed:s,blockLen:i,outputLen:c}=this;return t=t,t.finished=o,t.destroyed=s,t.blockLen=i,t.outputLen=c,t.oHash=n._cloneInto(t.oHash),t.iHash=r._cloneInto(t.iHash),t}clone(){return this._cloneInto()}destroy(){this.destroyed=!0,this.oHash.destroy(),this.iHash.destroy()}},ft=(e,t,n)=>new Cn(e,t).update(n).digest();ft.create=(e,t)=>new Cn(e,t);function ia(e,t,n,r){Rt(e);let o=On({dkLen:32,asyncTick:10},r),{c:s,dkLen:i,asyncTick:c}=o;if(re(s,"c"),re(i,"dkLen"),re(c,"asyncTick"),s<1)throw new Error("iterations (c) must be >= 1");let a=Mr(t,"password"),l=Mr(n,"salt"),u=new Uint8Array(i),f=ft.create(e,a),d=f._cloneInto().update(l);return{c:s,dkLen:i,asyncTick:c,DK:u,PRF:f,PRFSalt:d}}function ca(e,t,n,r,o){return e.destroy(),t.destroy(),r&&r.destroy(),xe(o),n}function tn(e,t,n,r){let{c:o,dkLen:s,DK:i,PRF:c,PRFSalt:a}=ia(e,t,n,r),l,u=new Uint8Array(4),f=ze(u),d=new Uint8Array(c.outputLen);for(let h=1,p=0;p<s;h++,p+=c.outputLen){let w=i.subarray(p,p+c.outputLen);f.setInt32(0,h,!1),(l=a._cloneInto(l)).update(u).digestInto(d),w.set(d.subarray(0,w.length));for(let m=1;m<o;m++){c._cloneInto(l).update(d).digestInto(d);for(let E=0;E<w.length;E++)w[E]^=d[E]}}return ca(c,a,i,l,d)}function Vr(e,t,n){return e&t^~e&n}function qr(e,t,n){return e&t^e&n^t&n}var xt=class{constructor(t,n,r,o){y(this,"blockLen");y(this,"outputLen");y(this,"padOffset");y(this,"isLE");y(this,"buffer");y(this,"view");y(this,"finished",!1);y(this,"length",0);y(this,"pos",0);y(this,"destroyed",!1);this.blockLen=t,this.outputLen=n,this.padOffset=r,this.isLE=o,this.buffer=new Uint8Array(t),this.view=ze(this.buffer)}update(t){Nt(this),C(t);let{view:n,buffer:r,blockLen:o}=this,s=t.length;for(let i=0;i<s;){let c=Math.min(o-this.pos,s-i);if(c===o){let a=ze(t);for(;o<=s-i;i+=o)this.process(a,i);continue}r.set(t.subarray(i,i+c),this.pos),this.pos+=c,i+=c,this.pos===o&&(this.process(n,0),this.pos=0)}return this.length+=t.length,this.roundClean(),this}digestInto(t){Nt(this),Ps(t,this),this.finished=!0;let{buffer:n,view:r,blockLen:o,isLE:s}=this,{pos:i}=this;n[i++]=128,xe(this.buffer.subarray(i)),this.padOffset>o-i&&(this.process(r,0),i=0);for(let f=i;f<o;f++)n[f]=0;r.setBigUint64(o-8,BigInt(this.length*8),s),this.process(r,0);let c=ze(t),a=this.outputLen;if(a%4)throw new Error("_sha2: outputLen must be aligned to 32bit");let l=a/4,u=this.get();if(l>u.length)throw new Error("_sha2: outputLen bigger than state");for(let f=0;f<l;f++)c.setUint32(4*f,u[f],s)}digest(){let{buffer:t,outputLen:n}=this;this.digestInto(t);let r=t.slice(0,n);return this.destroy(),r}_cloneInto(t){t||(t=new this.constructor),t.set(...this.get());let{blockLen:n,buffer:r,length:o,finished:s,destroyed:i,pos:c}=this;return t.destroyed=i,t.finished=s,t.length=o,t.pos=c,o%n&&t.buffer.set(r),t}clone(){return this._cloneInto()}},tt=Uint32Array.from([1779033703,3144134277,1013904242,2773480762,1359893119,2600822924,528734635,1541459225]);var me=Uint32Array.from([1779033703,4089235720,3144134277,2227873595,1013904242,4271175723,2773480762,1595750129,1359893119,2917565137,2600822924,725511199,528734635,4215389547,1541459225,327033209]);var Rn=BigInt(4294967295),Us=BigInt(32);function aa(e,t=!1){return t?{h:Number(e&Rn),l:Number(e>>Us&Rn)}:{h:Number(e>>Us&Rn)|0,l:Number(e&Rn)|0}}function Ls(e,t=!1){let n=e.length,r=new Uint32Array(n),o=new Uint32Array(n);for(let s=0;s<n;s++){let{h:i,l:c}=aa(e[s],t);[r[s],o[s]]=[i,c]}return[r,o]}var zr=(e,t,n)=>e>>>n,jr=(e,t,n)=>e<<32-n|t>>>n,Et=(e,t,n)=>e>>>n|t<<32-n,vt=(e,t,n)=>e<<32-n|t>>>n,nn=(e,t,n)=>e<<64-n|t>>>n-32,rn=(e,t,n)=>e>>>n-32|t<<64-n;function je(e,t,n,r){let o=(t>>>0)+(r>>>0);return{h:e+n+(o/2**32|0)|0,l:o|0}}var $s=(e,t,n)=>(e>>>0)+(t>>>0)+(n>>>0),Os=(e,t,n,r)=>t+n+r+(e/2**32|0)|0,Cs=(e,t,n,r)=>(e>>>0)+(t>>>0)+(n>>>0)+(r>>>0),Rs=(e,t,n,r,o)=>t+n+r+o+(e/2**32|0)|0,Ns=(e,t,n,r,o)=>(e>>>0)+(t>>>0)+(n>>>0)+(r>>>0)+(o>>>0),_s=(e,t,n,r,o,s)=>t+n+r+o+s+(e/2**32|0)|0;var ua=Uint32Array.from([1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298]),dt=new Uint32Array(64),Yr=class extends xt{constructor(t){super(64,t,8,!1)}get(){let{A:t,B:n,C:r,D:o,E:s,F:i,G:c,H:a}=this;return[t,n,r,o,s,i,c,a]}set(t,n,r,o,s,i,c,a){this.A=t|0,this.B=n|0,this.C=r|0,this.D=o|0,this.E=s|0,this.F=i|0,this.G=c|0,this.H=a|0}process(t,n){for(let f=0;f<16;f++,n+=4)dt[f]=t.getUint32(n,!1);for(let f=16;f<64;f++){let d=dt[f-15],h=dt[f-2],p=De(d,7)^De(d,18)^d>>>3,w=De(h,17)^De(h,19)^h>>>10;dt[f]=w+dt[f-7]+p+dt[f-16]|0}let{A:r,B:o,C:s,D:i,E:c,F:a,G:l,H:u}=this;for(let f=0;f<64;f++){let d=De(c,6)^De(c,11)^De(c,25),h=u+d+Vr(c,a,l)+ua[f]+dt[f]|0,w=(De(r,2)^De(r,13)^De(r,22))+qr(r,o,s)|0;u=l,l=a,a=c,c=i+h|0,i=s,s=o,o=r,r=h+w|0}r=r+this.A|0,o=o+this.B|0,s=s+this.C|0,i=i+this.D|0,c=c+this.E|0,a=a+this.F|0,l=l+this.G|0,u=u+this.H|0,this.set(r,o,s,i,c,a,l,u)}roundClean(){xe(dt)}destroy(){this.set(0,0,0,0,0,0,0,0),xe(this.buffer)}},Fr=class extends Yr{constructor(){super(32);y(this,"A",tt[0]|0);y(this,"B",tt[1]|0);y(this,"C",tt[2]|0);y(this,"D",tt[3]|0);y(this,"E",tt[4]|0);y(this,"F",tt[5]|0);y(this,"G",tt[6]|0);y(this,"H",tt[7]|0)}};var Hs=Ls(["0x428a2f98d728ae22","0x7137449123ef65cd","0xb5c0fbcfec4d3b2f","0xe9b5dba58189dbbc","0x3956c25bf348b538","0x59f111f1b605d019","0x923f82a4af194f9b","0xab1c5ed5da6d8118","0xd807aa98a3030242","0x12835b0145706fbe","0x243185be4ee4b28c","0x550c7dc3d5ffb4e2","0x72be5d74f27b896f","0x80deb1fe3b1696b1","0x9bdc06a725c71235","0xc19bf174cf692694","0xe49b69c19ef14ad2","0xefbe4786384f25e3","0x0fc19dc68b8cd5b5","0x240ca1cc77ac9c65","0x2de92c6f592b0275","0x4a7484aa6ea6e483","0x5cb0a9dcbd41fbd4","0x76f988da831153b5","0x983e5152ee66dfab","0xa831c66d2db43210","0xb00327c898fb213f","0xbf597fc7beef0ee4","0xc6e00bf33da88fc2","0xd5a79147930aa725","0x06ca6351e003826f","0x142929670a0e6e70","0x27b70a8546d22ffc","0x2e1b21385c26c926","0x4d2c6dfc5ac42aed","0x53380d139d95b3df","0x650a73548baf63de","0x766a0abb3c77b2a8","0x81c2c92e47edaee6","0x92722c851482353b","0xa2bfe8a14cf10364","0xa81a664bbc423001","0xc24b8b70d0f89791","0xc76c51a30654be30","0xd192e819d6ef5218","0xd69906245565a910","0xf40e35855771202a","0x106aa07032bbd1b8","0x19a4c116b8d2d0c8","0x1e376c085141ab53","0x2748774cdf8eeb99","0x34b0bcb5e19b48a8","0x391c0cb3c5c95a63","0x4ed8aa4ae3418acb","0x5b9cca4f7763e373","0x682e6ff3d6b2b8a3","0x748f82ee5defb2fc","0x78a5636f43172f60","0x84c87814a1f0ab72","0x8cc702081a6439ec","0x90befffa23631e28","0xa4506cebde82bde9","0xbef9a3f7b2c67915","0xc67178f2e372532b","0xca273eceea26619c","0xd186b8c721c0c207","0xeada7dd6cde0eb1e","0xf57d4f7fee6ed178","0x06f067aa72176fba","0x0a637dc5a2c898a6","0x113f9804bef90dae","0x1b710b35131c471b","0x28db77f523047d84","0x32caab7b40c72493","0x3c9ebe0a15c9bebc","0x431d67c49c100d4c","0x4cc5d4becb3e42b6","0x597f299cfc657e2a","0x5fcb6fab3ad6faec","0x6c44198c4a475817"].map(e=>BigInt(e))),fa=Hs[0],da=Hs[1],ht=new Uint32Array(80),pt=new Uint32Array(80),Gr=class extends xt{constructor(t){super(128,t,16,!1)}get(){let{Ah:t,Al:n,Bh:r,Bl:o,Ch:s,Cl:i,Dh:c,Dl:a,Eh:l,El:u,Fh:f,Fl:d,Gh:h,Gl:p,Hh:w,Hl:m}=this;return[t,n,r,o,s,i,c,a,l,u,f,d,h,p,w,m]}set(t,n,r,o,s,i,c,a,l,u,f,d,h,p,w,m){this.Ah=t|0,this.Al=n|0,this.Bh=r|0,this.Bl=o|0,this.Ch=s|0,this.Cl=i|0,this.Dh=c|0,this.Dl=a|0,this.Eh=l|0,this.El=u|0,this.Fh=f|0,this.Fl=d|0,this.Gh=h|0,this.Gl=p|0,this.Hh=w|0,this.Hl=m|0}process(t,n){for(let k=0;k<16;k++,n+=4)ht[k]=t.getUint32(n),pt[k]=t.getUint32(n+=4);for(let k=16;k<80;k++){let T=ht[k-15]|0,$=pt[k-15]|0,O=Et(T,$,1)^Et(T,$,8)^zr(T,$,7),te=vt(T,$,1)^vt(T,$,8)^jr(T,$,7),G=ht[k-2]|0,M=pt[k-2]|0,we=Et(G,M,19)^nn(G,M,61)^zr(G,M,6),ce=vt(G,M,19)^rn(G,M,61)^jr(G,M,6),N=Cs(te,ce,pt[k-7],pt[k-16]),R=Rs(N,O,we,ht[k-7],ht[k-16]);ht[k]=R|0,pt[k]=N|0}let{Ah:r,Al:o,Bh:s,Bl:i,Ch:c,Cl:a,Dh:l,Dl:u,Eh:f,El:d,Fh:h,Fl:p,Gh:w,Gl:m,Hh:E,Hl:v}=this;for(let k=0;k<80;k++){let T=Et(f,d,14)^Et(f,d,18)^nn(f,d,41),$=vt(f,d,14)^vt(f,d,18)^rn(f,d,41),O=f&h^~f&w,te=d&p^~d&m,G=Ns(v,$,te,da[k],pt[k]),M=_s(G,E,T,O,fa[k],ht[k]),we=G|0,ce=Et(r,o,28)^nn(r,o,34)^nn(r,o,39),N=vt(r,o,28)^rn(r,o,34)^rn(r,o,39),R=r&s^r&c^s&c,x=o&i^o&a^i&a;E=w|0,v=m|0,w=h|0,m=p|0,h=f|0,p=d|0,{h:f,l:d}=je(l|0,u|0,M|0,we|0),l=c|0,u=a|0,c=s|0,a=i|0,s=r|0,i=o|0;let b=$s(we,N,x);r=Os(b,M,ce,R),o=b|0}({h:r,l:o}=je(this.Ah|0,this.Al|0,r|0,o|0)),{h:s,l:i}=je(this.Bh|0,this.Bl|0,s|0,i|0),{h:c,l:a}=je(this.Ch|0,this.Cl|0,c|0,a|0),{h:l,l:u}=je(this.Dh|0,this.Dl|0,l|0,u|0),{h:f,l:d}=je(this.Eh|0,this.El|0,f|0,d|0),{h,l:p}=je(this.Fh|0,this.Fl|0,h|0,p|0),{h:w,l:m}=je(this.Gh|0,this.Gl|0,w|0,m|0),{h:E,l:v}=je(this.Hh|0,this.Hl|0,E|0,v|0),this.set(r,o,s,i,c,a,l,u,f,d,h,p,w,m,E,v)}roundClean(){xe(ht,pt)}destroy(){xe(this.buffer),this.set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)}},Zr=class extends Gr{constructor(){super(64);y(this,"Ah",me[0]|0);y(this,"Al",me[1]|0);y(this,"Bh",me[2]|0);y(this,"Bl",me[3]|0);y(this,"Ch",me[4]|0);y(this,"Cl",me[5]|0);y(this,"Dh",me[6]|0);y(this,"Dl",me[7]|0);y(this,"Eh",me[8]|0);y(this,"El",me[9]|0);y(this,"Fh",me[10]|0);y(this,"Fl",me[11]|0);y(this,"Gh",me[12]|0);y(this,"Gl",me[13]|0);y(this,"Hh",me[14]|0);y(this,"Hl",me[15]|0)}};var q=en(()=>new Fr,Wr(1));var on=en(()=>new Zr,Wr(3));function _t(e){return e instanceof Uint8Array||ArrayBuffer.isView(e)&&e.constructor.name==="Uint8Array"}function ha(e){if(!_t(e))throw new Error("Uint8Array expected")}function Ws(e,t){return Array.isArray(t)?t.length===0?!0:e?t.every(n=>typeof n=="string"):t.every(n=>Number.isSafeInteger(n)):!1}function Jr(e){if(typeof e!="function")throw new Error("function expected");return!0}function St(e,t){if(typeof t!="string")throw new Error(`${e}: string expected`);return!0}function Ht(e){if(!Number.isSafeInteger(e))throw new Error(`invalid integer: ${e}`)}function _n(e){if(!Array.isArray(e))throw new Error("array expected")}function Hn(e,t){if(!Ws(!0,t))throw new Error(`${e}: array of strings expected`)}function eo(e,t){if(!Ws(!1,t))throw new Error(`${e}: array of numbers expected`)}function cn(...e){let t=s=>s,n=(s,i)=>c=>s(i(c)),r=e.map(s=>s.encode).reduceRight(n,t),o=e.map(s=>s.decode).reduce(n,t);return{encode:r,decode:o}}function Mn(e){let t=typeof e=="string"?e.split(""):e,n=t.length;Hn("alphabet",t);let r=new Map(t.map((o,s)=>[o,s]));return{encode:o=>(_n(o),o.map(s=>{if(!Number.isSafeInteger(s)||s<0||s>=n)throw new Error(`alphabet.encode: digit index outside alphabet "${s}". Allowed: ${e}`);return t[s]})),decode:o=>(_n(o),o.map(s=>{St("alphabet.decode",s);let i=r.get(s);if(i===void 0)throw new Error(`Unknown letter: "${s}". Allowed: ${e}`);return i}))}}function Wn(e=""){return St("join",e),{encode:t=>(Hn("join.decode",t),t.join(e)),decode:t=>(St("join.decode",t),t.split(e))}}function pa(e,t="="){return Ht(e),St("padding",t),{encode(n){for(Hn("padding.encode",n);n.length*e%8;)n.push(t);return n},decode(n){Hn("padding.decode",n);let r=n.length;if(r*e%8)throw new Error("padding: invalid, string should have whole number of bytes");for(;r>0&&n[r-1]===t;r--)if((r-1)*e%8===0)throw new Error("padding: invalid, string has too much padding");return n.slice(0,r)}}}function ga(e){return Jr(e),{encode:t=>t,decode:t=>e(t)}}function Xr(e,t,n){if(t<2)throw new Error(`convertRadix: invalid from=${t}, base cannot be less than 2`);if(n<2)throw new Error(`convertRadix: invalid to=${n}, base cannot be less than 2`);if(_n(e),!e.length)return[];let r=0,o=[],s=Array.from(e,c=>{if(Ht(c),c<0||c>=t)throw new Error(`invalid integer: ${c}`);return c}),i=s.length;for(;;){let c=0,a=!0;for(let l=r;l<i;l++){let u=s[l],f=t*c,d=f+u;if(!Number.isSafeInteger(d)||f/t!==c||d-u!==f)throw new Error("convertRadix: carry overflow");let h=d/n;c=d%n;let p=Math.floor(h);if(s[l]=p,!Number.isSafeInteger(p)||p*n+c!==d)throw new Error("convertRadix: carry overflow");if(a)p?a=!1:r=l;else continue}if(o.push(c),a)break}for(let c=0;c<e.length-1&&e[c]===0;c++)o.push(0);return o.reverse()}var Vs=(e,t)=>t===0?e:Vs(t,e%t),Kn=(e,t)=>e+(t-Vs(e,t)),Nn=(()=>{let e=[];for(let t=0;t<40;t++)e.push(2**t);return e})();function Dn(e,t,n,r){if(_n(e),t<=0||t>32)throw new Error(`convertRadix2: wrong from=${t}`);if(n<=0||n>32)throw new Error(`convertRadix2: wrong to=${n}`);if(Kn(t,n)>32)throw new Error(`convertRadix2: carry overflow from=${t} to=${n} carryBits=${Kn(t,n)}`);let o=0,s=0,i=Nn[t],c=Nn[n]-1,a=[];for(let l of e){if(Ht(l),l>=i)throw new Error(`convertRadix2: invalid data word=${l} from=${t}`);if(o=o<<t|l,s+t>32)throw new Error(`convertRadix2: carry overflow pos=${s} from=${t}`);for(s+=t;s>=n;s-=n)a.push((o>>s-n&c)>>>0);let u=Nn[s];if(u===void 0)throw new Error("invalid carry");o&=u-1}if(o=o<<n-s&c,!r&&s>=t)throw new Error("Excess padding");if(!r&&o>0)throw new Error(`Non-zero padding: ${o}`);return r&&s>0&&a.push(o>>>0),a}function qs(e){Ht(e);let t=2**8;return{encode:n=>{if(!_t(n))throw new Error("radix.encode input should be Uint8Array");return Xr(Array.from(n),t,e)},decode:n=>(eo("radix.decode",n),Uint8Array.from(Xr(n,e,t)))}}function to(e,t=!1){if(Ht(e),e<=0||e>32)throw new Error("radix2: bits should be in (0..32]");if(Kn(8,e)>32||Kn(e,8)>32)throw new Error("radix2: carry overflow");return{encode:n=>{if(!_t(n))throw new Error("radix2.encode input should be Uint8Array");return Dn(Array.from(n),8,e,!t)},decode:n=>(eo("radix2.decode",n),Uint8Array.from(Dn(n,e,8,t)))}}function Ks(e){return Jr(e),function(...t){try{return e.apply(null,t)}catch{}}}function zs(e,t){return Ht(e),Jr(t),{encode(n){if(!_t(n))throw new Error("checksum.encode: input should be Uint8Array");let r=t(n).slice(0,e),o=new Uint8Array(n.length+e);return o.set(n),o.set(r,n.length),o},decode(n){if(!_t(n))throw new Error("checksum.decode: input should be Uint8Array");let r=n.slice(0,-e),o=n.slice(-e),s=t(r).slice(0,e);for(let i=0;i<e;i++)if(s[i]!==o[i])throw new Error("Invalid checksum");return r}}}var an={alphabet:Mn,chain:cn,checksum:zs,convertRadix:Xr,convertRadix2:Dn,radix:qs,radix2:to,join:Wn,padding:pa};var wa=e=>cn(qs(58),Mn(e),Wn("")),ya=wa("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");var Vn=e=>cn(zs(4,t=>e(e(t))),ya);var Qr=cn(Mn("qpzry9x8gf2tvdw0s3jn54khce6mua7l"),Wn("")),Ds=[996825010,642813549,513874426,1027748829,705979059];function sn(e){let t=e>>25,n=(e&33554431)<<5;for(let r=0;r<Ds.length;r++)(t>>r&1)===1&&(n^=Ds[r]);return n}function Ms(e,t,n=1){let r=e.length,o=1;for(let s=0;s<r;s++){let i=e.charCodeAt(s);if(i<33||i>126)throw new Error(`Invalid prefix (${e})`);o=sn(o)^i>>5}o=sn(o);for(let s=0;s<r;s++)o=sn(o)^e.charCodeAt(s)&31;for(let s of t)o=sn(o)^s;for(let s=0;s<6;s++)o=sn(o);return o^=n,Qr.encode(Dn([o%Nn[30]],30,5,!1))}function js(e){let t=e==="bech32"?1:734539939,n=to(5),r=n.decode,o=n.encode,s=Ks(r);function i(f,d,h=90){St("bech32.encode prefix",f),_t(d)&&(d=Array.from(d)),eo("bech32.encode",d);let p=f.length;if(p===0)throw new TypeError(`Invalid prefix length ${p}`);let w=p+7+d.length;if(h!==!1&&w>h)throw new TypeError(`Length ${w} exceeds limit ${h}`);let m=f.toLowerCase(),E=Ms(m,d,t);return`${m}1${Qr.encode(d)}${E}`}function c(f,d=90){St("bech32.decode input",f);let h=f.length;if(h<8||d!==!1&&h>d)throw new TypeError(`invalid string length: ${h} (${f}). Expected (8..${d})`);let p=f.toLowerCase();if(f!==p&&f!==f.toUpperCase())throw new Error("String must be lowercase or uppercase");let w=p.lastIndexOf("1");if(w===0||w===-1)throw new Error('Letter "1" must be present between prefix and data only');let m=p.slice(0,w),E=p.slice(w+1);if(E.length<6)throw new Error("Data must be at least 6 characters long");let v=Qr.decode(E).slice(0,-6),k=Ms(m,v,t);if(!E.endsWith(k))throw new Error(`Invalid checksum in ${f}: expected "${k}"`);return{prefix:m,words:v}}let a=Ks(c);function l(f){let{prefix:d,words:h}=c(f,!1);return{prefix:d,words:h,bytes:r(h)}}function u(f,d){return i(f,o(d))}return{encode:i,decode:c,encodeFromBytes:u,decodeToBytes:l,decodeUnsafe:a,fromWords:r,fromWordsUnsafe:s,toWords:o}}var qn=js("bech32"),no=js("bech32m"),Ys={encode:e=>new TextDecoder().decode(e),decode:e=>new TextEncoder().encode(e)},ma=typeof Uint8Array.from([]).toHex=="function"&&typeof Uint8Array.fromHex=="function",ba={encode(e){return ha(e),e.toHex()},decode(e){return St("hex",e),Uint8Array.fromHex(e)}},F=ma?ba:cn(to(4),Mn("0123456789abcdef"),Wn(""),ga(e=>{if(typeof e!="string"||e.length%2!==0)throw new TypeError(`hex.decode: expected string, got ${typeof e} with length ${e.length}`);return e.toLowerCase()}));var xa=e=>e[0]==="\u3042\u3044\u3053\u304F\u3057\u3093";function Fs(e){if(typeof e!="string")throw new TypeError("invalid mnemonic type: "+typeof e);return e.normalize("NFKD")}function Gs(e){let t=Fs(e),n=t.split(" ");if(![12,15,18,21,24].includes(n.length))throw new Error("Invalid mnemonic");return{nfkd:t,words:n}}function Zs(e){if(C(e),![16,20,24,28,32].includes(e.length))throw new Error("invalid entropy length")}var Ea=e=>{let t=8-e.length/4;return new Uint8Array([q(e)[0]>>t<<t])};function Xs(e){if(!Array.isArray(e)||e.length!==2048||typeof e[0]!="string")throw new Error("Wordlist: expected array of 2048 strings");return e.forEach(t=>{if(typeof t!="string")throw new Error("wordlist: non-string element: "+t)}),an.chain(an.checksum(1,Ea),an.radix2(11,!0),an.alphabet(e))}function va(e,t){let{words:n}=Gs(e),r=Xs(t).decode(n);return Zs(r),r}function Qs(e,t){return Zs(e),Xs(t).encode(e).join(xa(t)?"\u3000":" ")}function zn(e,t){try{va(e,t)}catch{return!1}return!0}var Sa=e=>Fs("mnemonic"+e);function Js(e,t=""){return tn(on,Gs(e).nfkd,Sa(t),{c:2048,dkLen:64})}var ln=`abandon
+ability
+able
+about
+above
+absent
+absorb
+abstract
+absurd
+abuse
+access
+accident
+account
+accuse
+achieve
+acid
+acoustic
+acquire
+across
+act
+action
+actor
+actress
+actual
+adapt
+add
+addict
+address
+adjust
+admit
+adult
+advance
+advice
+aerobic
+affair
+afford
+afraid
+again
+age
+agent
+agree
+ahead
+aim
+air
+airport
+aisle
+alarm
+album
+alcohol
+alert
+alien
+all
+alley
+allow
+almost
+alone
+alpha
+already
+also
+alter
+always
+amateur
+amazing
+among
+amount
+amused
+analyst
+anchor
+ancient
+anger
+angle
+angry
+animal
+ankle
+announce
+annual
+another
+answer
+antenna
+antique
+anxiety
+any
+apart
+apology
+appear
+apple
+approve
+april
+arch
+arctic
+area
+arena
+argue
+arm
+armed
+armor
+army
+around
+arrange
+arrest
+arrive
+arrow
+art
+artefact
+artist
+artwork
+ask
+aspect
+assault
+asset
+assist
+assume
+asthma
+athlete
+atom
+attack
+attend
+attitude
+attract
+auction
+audit
+august
+aunt
+author
+auto
+autumn
+average
+avocado
+avoid
+awake
+aware
+away
+awesome
+awful
+awkward
+axis
+baby
+bachelor
+bacon
+badge
+bag
+balance
+balcony
+ball
+bamboo
+banana
+banner
+bar
+barely
+bargain
+barrel
+base
+basic
+basket
+battle
+beach
+bean
+beauty
+because
+become
+beef
+before
+begin
+behave
+behind
+believe
+below
+belt
+bench
+benefit
+best
+betray
+better
+between
+beyond
+bicycle
+bid
+bike
+bind
+biology
+bird
+birth
+bitter
+black
+blade
+blame
+blanket
+blast
+bleak
+bless
+blind
+blood
+blossom
+blouse
+blue
+blur
+blush
+board
+boat
+body
+boil
+bomb
+bone
+bonus
+book
+boost
+border
+boring
+borrow
+boss
+bottom
+bounce
+box
+boy
+bracket
+brain
+brand
+brass
+brave
+bread
+breeze
+brick
+bridge
+brief
+bright
+bring
+brisk
+broccoli
+broken
+bronze
+broom
+brother
+brown
+brush
+bubble
+buddy
+budget
+buffalo
+build
+bulb
+bulk
+bullet
+bundle
+bunker
+burden
+burger
+burst
+bus
+business
+busy
+butter
+buyer
+buzz
+cabbage
+cabin
+cable
+cactus
+cage
+cake
+call
+calm
+camera
+camp
+can
+canal
+cancel
+candy
+cannon
+canoe
+canvas
+canyon
+capable
+capital
+captain
+car
+carbon
+card
+cargo
+carpet
+carry
+cart
+case
+cash
+casino
+castle
+casual
+cat
+catalog
+catch
+category
+cattle
+caught
+cause
+caution
+cave
+ceiling
+celery
+cement
+census
+century
+cereal
+certain
+chair
+chalk
+champion
+change
+chaos
+chapter
+charge
+chase
+chat
+cheap
+check
+cheese
+chef
+cherry
+chest
+chicken
+chief
+child
+chimney
+choice
+choose
+chronic
+chuckle
+chunk
+churn
+cigar
+cinnamon
+circle
+citizen
+city
+civil
+claim
+clap
+clarify
+claw
+clay
+clean
+clerk
+clever
+click
+client
+cliff
+climb
+clinic
+clip
+clock
+clog
+close
+cloth
+cloud
+clown
+club
+clump
+cluster
+clutch
+coach
+coast
+coconut
+code
+coffee
+coil
+coin
+collect
+color
+column
+combine
+come
+comfort
+comic
+common
+company
+concert
+conduct
+confirm
+congress
+connect
+consider
+control
+convince
+cook
+cool
+copper
+copy
+coral
+core
+corn
+correct
+cost
+cotton
+couch
+country
+couple
+course
+cousin
+cover
+coyote
+crack
+cradle
+craft
+cram
+crane
+crash
+crater
+crawl
+crazy
+cream
+credit
+creek
+crew
+cricket
+crime
+crisp
+critic
+crop
+cross
+crouch
+crowd
+crucial
+cruel
+cruise
+crumble
+crunch
+crush
+cry
+crystal
+cube
+culture
+cup
+cupboard
+curious
+current
+curtain
+curve
+cushion
+custom
+cute
+cycle
+dad
+damage
+damp
+dance
+danger
+daring
+dash
+daughter
+dawn
+day
+deal
+debate
+debris
+decade
+december
+decide
+decline
+decorate
+decrease
+deer
+defense
+define
+defy
+degree
+delay
+deliver
+demand
+demise
+denial
+dentist
+deny
+depart
+depend
+deposit
+depth
+deputy
+derive
+describe
+desert
+design
+desk
+despair
+destroy
+detail
+detect
+develop
+device
+devote
+diagram
+dial
+diamond
+diary
+dice
+diesel
+diet
+differ
+digital
+dignity
+dilemma
+dinner
+dinosaur
+direct
+dirt
+disagree
+discover
+disease
+dish
+dismiss
+disorder
+display
+distance
+divert
+divide
+divorce
+dizzy
+doctor
+document
+dog
+doll
+dolphin
+domain
+donate
+donkey
+donor
+door
+dose
+double
+dove
+draft
+dragon
+drama
+drastic
+draw
+dream
+dress
+drift
+drill
+drink
+drip
+drive
+drop
+drum
+dry
+duck
+dumb
+dune
+during
+dust
+dutch
+duty
+dwarf
+dynamic
+eager
+eagle
+early
+earn
+earth
+easily
+east
+easy
+echo
+ecology
+economy
+edge
+edit
+educate
+effort
+egg
+eight
+either
+elbow
+elder
+electric
+elegant
+element
+elephant
+elevator
+elite
+else
+embark
+embody
+embrace
+emerge
+emotion
+employ
+empower
+empty
+enable
+enact
+end
+endless
+endorse
+enemy
+energy
+enforce
+engage
+engine
+enhance
+enjoy
+enlist
+enough
+enrich
+enroll
+ensure
+enter
+entire
+entry
+envelope
+episode
+equal
+equip
+era
+erase
+erode
+erosion
+error
+erupt
+escape
+essay
+essence
+estate
+eternal
+ethics
+evidence
+evil
+evoke
+evolve
+exact
+example
+excess
+exchange
+excite
+exclude
+excuse
+execute
+exercise
+exhaust
+exhibit
+exile
+exist
+exit
+exotic
+expand
+expect
+expire
+explain
+expose
+express
+extend
+extra
+eye
+eyebrow
+fabric
+face
+faculty
+fade
+faint
+faith
+fall
+false
+fame
+family
+famous
+fan
+fancy
+fantasy
+farm
+fashion
+fat
+fatal
+father
+fatigue
+fault
+favorite
+feature
+february
+federal
+fee
+feed
+feel
+female
+fence
+festival
+fetch
+fever
+few
+fiber
+fiction
+field
+figure
+file
+film
+filter
+final
+find
+fine
+finger
+finish
+fire
+firm
+first
+fiscal
+fish
+fit
+fitness
+fix
+flag
+flame
+flash
+flat
+flavor
+flee
+flight
+flip
+float
+flock
+floor
+flower
+fluid
+flush
+fly
+foam
+focus
+fog
+foil
+fold
+follow
+food
+foot
+force
+forest
+forget
+fork
+fortune
+forum
+forward
+fossil
+foster
+found
+fox
+fragile
+frame
+frequent
+fresh
+friend
+fringe
+frog
+front
+frost
+frown
+frozen
+fruit
+fuel
+fun
+funny
+furnace
+fury
+future
+gadget
+gain
+galaxy
+gallery
+game
+gap
+garage
+garbage
+garden
+garlic
+garment
+gas
+gasp
+gate
+gather
+gauge
+gaze
+general
+genius
+genre
+gentle
+genuine
+gesture
+ghost
+giant
+gift
+giggle
+ginger
+giraffe
+girl
+give
+glad
+glance
+glare
+glass
+glide
+glimpse
+globe
+gloom
+glory
+glove
+glow
+glue
+goat
+goddess
+gold
+good
+goose
+gorilla
+gospel
+gossip
+govern
+gown
+grab
+grace
+grain
+grant
+grape
+grass
+gravity
+great
+green
+grid
+grief
+grit
+grocery
+group
+grow
+grunt
+guard
+guess
+guide
+guilt
+guitar
+gun
+gym
+habit
+hair
+half
+hammer
+hamster
+hand
+happy
+harbor
+hard
+harsh
+harvest
+hat
+have
+hawk
+hazard
+head
+health
+heart
+heavy
+hedgehog
+height
+hello
+helmet
+help
+hen
+hero
+hidden
+high
+hill
+hint
+hip
+hire
+history
+hobby
+hockey
+hold
+hole
+holiday
+hollow
+home
+honey
+hood
+hope
+horn
+horror
+horse
+hospital
+host
+hotel
+hour
+hover
+hub
+huge
+human
+humble
+humor
+hundred
+hungry
+hunt
+hurdle
+hurry
+hurt
+husband
+hybrid
+ice
+icon
+idea
+identify
+idle
+ignore
+ill
+illegal
+illness
+image
+imitate
+immense
+immune
+impact
+impose
+improve
+impulse
+inch
+include
+income
+increase
+index
+indicate
+indoor
+industry
+infant
+inflict
+inform
+inhale
+inherit
+initial
+inject
+injury
+inmate
+inner
+innocent
+input
+inquiry
+insane
+insect
+inside
+inspire
+install
+intact
+interest
+into
+invest
+invite
+involve
+iron
+island
+isolate
+issue
+item
+ivory
+jacket
+jaguar
+jar
+jazz
+jealous
+jeans
+jelly
+jewel
+job
+join
+joke
+journey
+joy
+judge
+juice
+jump
+jungle
+junior
+junk
+just
+kangaroo
+keen
+keep
+ketchup
+key
+kick
+kid
+kidney
+kind
+kingdom
+kiss
+kit
+kitchen
+kite
+kitten
+kiwi
+knee
+knife
+knock
+know
+lab
+label
+labor
+ladder
+lady
+lake
+lamp
+language
+laptop
+large
+later
+latin
+laugh
+laundry
+lava
+law
+lawn
+lawsuit
+layer
+lazy
+leader
+leaf
+learn
+leave
+lecture
+left
+leg
+legal
+legend
+leisure
+lemon
+lend
+length
+lens
+leopard
+lesson
+letter
+level
+liar
+liberty
+library
+license
+life
+lift
+light
+like
+limb
+limit
+link
+lion
+liquid
+list
+little
+live
+lizard
+load
+loan
+lobster
+local
+lock
+logic
+lonely
+long
+loop
+lottery
+loud
+lounge
+love
+loyal
+lucky
+luggage
+lumber
+lunar
+lunch
+luxury
+lyrics
+machine
+mad
+magic
+magnet
+maid
+mail
+main
+major
+make
+mammal
+man
+manage
+mandate
+mango
+mansion
+manual
+maple
+marble
+march
+margin
+marine
+market
+marriage
+mask
+mass
+master
+match
+material
+math
+matrix
+matter
+maximum
+maze
+meadow
+mean
+measure
+meat
+mechanic
+medal
+media
+melody
+melt
+member
+memory
+mention
+menu
+mercy
+merge
+merit
+merry
+mesh
+message
+metal
+method
+middle
+midnight
+milk
+million
+mimic
+mind
+minimum
+minor
+minute
+miracle
+mirror
+misery
+miss
+mistake
+mix
+mixed
+mixture
+mobile
+model
+modify
+mom
+moment
+monitor
+monkey
+monster
+month
+moon
+moral
+more
+morning
+mosquito
+mother
+motion
+motor
+mountain
+mouse
+move
+movie
+much
+muffin
+mule
+multiply
+muscle
+museum
+mushroom
+music
+must
+mutual
+myself
+mystery
+myth
+naive
+name
+napkin
+narrow
+nasty
+nation
+nature
+near
+neck
+need
+negative
+neglect
+neither
+nephew
+nerve
+nest
+net
+network
+neutral
+never
+news
+next
+nice
+night
+noble
+noise
+nominee
+noodle
+normal
+north
+nose
+notable
+note
+nothing
+notice
+novel
+now
+nuclear
+number
+nurse
+nut
+oak
+obey
+object
+oblige
+obscure
+observe
+obtain
+obvious
+occur
+ocean
+october
+odor
+off
+offer
+office
+often
+oil
+okay
+old
+olive
+olympic
+omit
+once
+one
+onion
+online
+only
+open
+opera
+opinion
+oppose
+option
+orange
+orbit
+orchard
+order
+ordinary
+organ
+orient
+original
+orphan
+ostrich
+other
+outdoor
+outer
+output
+outside
+oval
+oven
+over
+own
+owner
+oxygen
+oyster
+ozone
+pact
+paddle
+page
+pair
+palace
+palm
+panda
+panel
+panic
+panther
+paper
+parade
+parent
+park
+parrot
+party
+pass
+patch
+path
+patient
+patrol
+pattern
+pause
+pave
+payment
+peace
+peanut
+pear
+peasant
+pelican
+pen
+penalty
+pencil
+people
+pepper
+perfect
+permit
+person
+pet
+phone
+photo
+phrase
+physical
+piano
+picnic
+picture
+piece
+pig
+pigeon
+pill
+pilot
+pink
+pioneer
+pipe
+pistol
+pitch
+pizza
+place
+planet
+plastic
+plate
+play
+please
+pledge
+pluck
+plug
+plunge
+poem
+poet
+point
+polar
+pole
+police
+pond
+pony
+pool
+popular
+portion
+position
+possible
+post
+potato
+pottery
+poverty
+powder
+power
+practice
+praise
+predict
+prefer
+prepare
+present
+pretty
+prevent
+price
+pride
+primary
+print
+priority
+prison
+private
+prize
+problem
+process
+produce
+profit
+program
+project
+promote
+proof
+property
+prosper
+protect
+proud
+provide
+public
+pudding
+pull
+pulp
+pulse
+pumpkin
+punch
+pupil
+puppy
+purchase
+purity
+purpose
+purse
+push
+put
+puzzle
+pyramid
+quality
+quantum
+quarter
+question
+quick
+quit
+quiz
+quote
+rabbit
+raccoon
+race
+rack
+radar
+radio
+rail
+rain
+raise
+rally
+ramp
+ranch
+random
+range
+rapid
+rare
+rate
+rather
+raven
+raw
+razor
+ready
+real
+reason
+rebel
+rebuild
+recall
+receive
+recipe
+record
+recycle
+reduce
+reflect
+reform
+refuse
+region
+regret
+regular
+reject
+relax
+release
+relief
+rely
+remain
+remember
+remind
+remove
+render
+renew
+rent
+reopen
+repair
+repeat
+replace
+report
+require
+rescue
+resemble
+resist
+resource
+response
+result
+retire
+retreat
+return
+reunion
+reveal
+review
+reward
+rhythm
+rib
+ribbon
+rice
+rich
+ride
+ridge
+rifle
+right
+rigid
+ring
+riot
+ripple
+risk
+ritual
+rival
+river
+road
+roast
+robot
+robust
+rocket
+romance
+roof
+rookie
+room
+rose
+rotate
+rough
+round
+route
+royal
+rubber
+rude
+rug
+rule
+run
+runway
+rural
+sad
+saddle
+sadness
+safe
+sail
+salad
+salmon
+salon
+salt
+salute
+same
+sample
+sand
+satisfy
+satoshi
+sauce
+sausage
+save
+say
+scale
+scan
+scare
+scatter
+scene
+scheme
+school
+science
+scissors
+scorpion
+scout
+scrap
+screen
+script
+scrub
+sea
+search
+season
+seat
+second
+secret
+section
+security
+seed
+seek
+segment
+select
+sell
+seminar
+senior
+sense
+sentence
+series
+service
+session
+settle
+setup
+seven
+shadow
+shaft
+shallow
+share
+shed
+shell
+sheriff
+shield
+shift
+shine
+ship
+shiver
+shock
+shoe
+shoot
+shop
+short
+shoulder
+shove
+shrimp
+shrug
+shuffle
+shy
+sibling
+sick
+side
+siege
+sight
+sign
+silent
+silk
+silly
+silver
+similar
+simple
+since
+sing
+siren
+sister
+situate
+six
+size
+skate
+sketch
+ski
+skill
+skin
+skirt
+skull
+slab
+slam
+sleep
+slender
+slice
+slide
+slight
+slim
+slogan
+slot
+slow
+slush
+small
+smart
+smile
+smoke
+smooth
+snack
+snake
+snap
+sniff
+snow
+soap
+soccer
+social
+sock
+soda
+soft
+solar
+soldier
+solid
+solution
+solve
+someone
+song
+soon
+sorry
+sort
+soul
+sound
+soup
+source
+south
+space
+spare
+spatial
+spawn
+speak
+special
+speed
+spell
+spend
+sphere
+spice
+spider
+spike
+spin
+spirit
+split
+spoil
+sponsor
+spoon
+sport
+spot
+spray
+spread
+spring
+spy
+square
+squeeze
+squirrel
+stable
+stadium
+staff
+stage
+stairs
+stamp
+stand
+start
+state
+stay
+steak
+steel
+stem
+step
+stereo
+stick
+still
+sting
+stock
+stomach
+stone
+stool
+story
+stove
+strategy
+street
+strike
+strong
+struggle
+student
+stuff
+stumble
+style
+subject
+submit
+subway
+success
+such
+sudden
+suffer
+sugar
+suggest
+suit
+summer
+sun
+sunny
+sunset
+super
+supply
+supreme
+sure
+surface
+surge
+surprise
+surround
+survey
+suspect
+sustain
+swallow
+swamp
+swap
+swarm
+swear
+sweet
+swift
+swim
+swing
+switch
+sword
+symbol
+symptom
+syrup
+system
+table
+tackle
+tag
+tail
+talent
+talk
+tank
+tape
+target
+task
+taste
+tattoo
+taxi
+teach
+team
+tell
+ten
+tenant
+tennis
+tent
+term
+test
+text
+thank
+that
+theme
+then
+theory
+there
+they
+thing
+this
+thought
+three
+thrive
+throw
+thumb
+thunder
+ticket
+tide
+tiger
+tilt
+timber
+time
+tiny
+tip
+tired
+tissue
+title
+toast
+tobacco
+today
+toddler
+toe
+together
+toilet
+token
+tomato
+tomorrow
+tone
+tongue
+tonight
+tool
+tooth
+top
+topic
+topple
+torch
+tornado
+tortoise
+toss
+total
+tourist
+toward
+tower
+town
+toy
+track
+trade
+traffic
+tragic
+train
+transfer
+trap
+trash
+travel
+tray
+treat
+tree
+trend
+trial
+tribe
+trick
+trigger
+trim
+trip
+trophy
+trouble
+truck
+true
+truly
+trumpet
+trust
+truth
+try
+tube
+tuition
+tumble
+tuna
+tunnel
+turkey
+turn
+turtle
+twelve
+twenty
+twice
+twin
+twist
+two
+type
+typical
+ugly
+umbrella
+unable
+unaware
+uncle
+uncover
+under
+undo
+unfair
+unfold
+unhappy
+uniform
+unique
+unit
+universe
+unknown
+unlock
+until
+unusual
+unveil
+update
+upgrade
+uphold
+upon
+upper
+upset
+urban
+urge
+usage
+use
+used
+useful
+useless
+usual
+utility
+vacant
+vacuum
+vague
+valid
+valley
+valve
+van
+vanish
+vapor
+various
+vast
+vault
+vehicle
+velvet
+vendor
+venture
+venue
+verb
+verify
+version
+very
+vessel
+veteran
+viable
+vibrant
+vicious
+victory
+video
+view
+village
+vintage
+violin
+virtual
+virus
+visa
+visit
+visual
+vital
+vivid
+vocal
+voice
+void
+volcano
+volume
+vote
+voyage
+wage
+wagon
+wait
+walk
+wall
+walnut
+want
+warfare
+warm
+warrior
+wash
+wasp
+waste
+water
+wave
+way
+wealth
+weapon
+wear
+weasel
+weather
+web
+wedding
+weekend
+weird
+welcome
+west
+wet
+whale
+what
+wheat
+wheel
+when
+where
+whip
+whisper
+wide
+width
+wife
+wild
+will
+win
+window
+wine
+wing
+wink
+winner
+winter
+wire
+wisdom
+wise
+wish
+witness
+wolf
+woman
+wonder
+wood
+wool
+word
+work
+world
+worry
+worth
+wrap
+wreck
+wrestle
+wrist
+write
+wrong
+yard
+year
+yellow
+you
+young
+youth
+zebra
+zero
+zone
+zoo`.split(`
+`);var oo=BigInt(0),ro=BigInt(1);function un(e,t=""){if(typeof e!="boolean"){let n=t&&`"${t}" `;throw new Error(n+"expected boolean, got type="+typeof e)}return e}function ei(e){if(typeof e=="bigint"){if(!jn(e))throw new Error("positive bigint expected, got "+e)}else re(e);return e}function fn(e){let t=ei(e).toString(16);return t.length&1?"0"+t:t}function ti(e){if(typeof e!="string")throw new Error("hex string expected, got "+typeof e);return e===""?oo:BigInt("0x"+e)}function Le(e){return ti(Me(e))}function so(e){return ti(Me(Ba(C(e)).reverse()))}function Kt(e,t){re(t),e=ei(e);let n=et(e.toString(16).padStart(t*2,"0"));if(n.length!==t)throw new Error("number too large");return n}function io(e,t){return Kt(e,t).reverse()}function Ba(e){return Uint8Array.from(e)}function ni(e){return Uint8Array.from(e,(t,n)=>{let r=t.charCodeAt(0);if(t.length!==1||r>127)throw new Error(`string contains non-ASCII character "${e[n]}" with code ${r} at position ${n}`);return r})}var jn=e=>typeof e=="bigint"&&oo<=e;function Aa(e,t,n){return jn(e)&&jn(t)&&jn(n)&&t<=e&&e<n}function ri(e,t,n,r){if(!Aa(t,n,r))throw new Error("expected valid "+e+": "+n+" <= n < "+r+", got "+t)}function co(e){let t;for(t=0;e>oo;e>>=ro,t+=1);return t}var dn=e=>(ro<<BigInt(e))-ro;function oi(e,t,n){if(re(e,"hashLen"),re(t,"qByteLen"),typeof n!="function")throw new Error("hmacFn must be a function");let r=m=>new Uint8Array(m),o=Uint8Array.of(),s=Uint8Array.of(0),i=Uint8Array.of(1),c=1e3,a=r(e),l=r(e),u=0,f=()=>{a.fill(1),l.fill(0),u=0},d=(...m)=>n(l,ae(a,...m)),h=(m=o)=>{l=d(s,m),a=d(),m.length!==0&&(l=d(i,m),a=d())},p=()=>{if(u++>=c)throw new Error("drbg: tried max amount of iterations");let m=0,E=[];for(;m<t;){a=d();let v=a.slice();E.push(v),m+=a.length}return ae(...E)};return(m,E)=>{f(),h(m);let v;for(;!(v=E(p()));)h();return f(),v}}function hn(e,t={},n={}){if(!e||typeof e!="object")throw new Error("expected valid options object");function r(s,i,c){let a=e[s];if(c&&a===void 0)return;let l=typeof a;if(l!==i||a===null)throw new Error(`param "${s}" is invalid: expected ${i}, got ${l}`)}let o=(s,i)=>Object.entries(s).forEach(([c,a])=>r(c,a,i));o(t,!1),o(n,!0)}function ao(e){let t=new WeakMap;return(n,...r)=>{let o=t.get(n);if(o!==void 0)return o;let s=e(n,...r);return t.set(n,s),s}}var Pe=BigInt(0),Ee=BigInt(1),kt=BigInt(2),ci=BigInt(3),ai=BigInt(4),li=BigInt(5),Ta=BigInt(7),ui=BigInt(8),Pa=BigInt(9),fi=BigInt(16);function We(e,t){let n=e%t;return n>=Pe?n:t+n}function $e(e,t,n){let r=e;for(;t-- >Pe;)r*=r,r%=n;return r}function si(e,t){if(e===Pe)throw new Error("invert: expected non-zero number");if(t<=Pe)throw new Error("invert: expected positive modulus, got "+t);let n=We(e,t),r=t,o=Pe,s=Ee,i=Ee,c=Pe;for(;n!==Pe;){let l=r/n,u=r%n,f=o-i*l,d=s-c*l;r=n,n=u,o=i,s=c,i=f,c=d}if(r!==Ee)throw new Error("invert: does not exist");return We(o,t)}function uo(e,t,n){if(!e.eql(e.sqr(t),n))throw new Error("Cannot find square root")}function di(e,t){let n=(e.ORDER+Ee)/ai,r=e.pow(t,n);return uo(e,r,t),r}function Ia(e,t){let n=(e.ORDER-li)/ui,r=e.mul(t,kt),o=e.pow(r,n),s=e.mul(t,o),i=e.mul(e.mul(s,kt),o),c=e.mul(s,e.sub(i,e.ONE));return uo(e,c,t),c}function Ua(e){let t=Dt(e),n=hi(e),r=n(t,t.neg(t.ONE)),o=n(t,r),s=n(t,t.neg(r)),i=(e+Ta)/fi;return(c,a)=>{let l=c.pow(a,i),u=c.mul(l,r),f=c.mul(l,o),d=c.mul(l,s),h=c.eql(c.sqr(u),a),p=c.eql(c.sqr(f),a);l=c.cmov(l,u,h),u=c.cmov(d,f,p);let w=c.eql(c.sqr(u),a),m=c.cmov(l,u,w);return uo(c,m,a),m}}function hi(e){if(e<ci)throw new Error("sqrt is not defined for small field");let t=e-Ee,n=0;for(;t%kt===Pe;)t/=kt,n++;let r=kt,o=Dt(e);for(;ii(o,r)===1;)if(r++>1e3)throw new Error("Cannot find square root: probably non-prime P");if(n===1)return di;let s=o.pow(r,t),i=(t+Ee)/kt;return function(a,l){if(a.is0(l))return l;if(ii(a,l)!==1)throw new Error("Cannot find square root");let u=n,f=a.mul(a.ONE,s),d=a.pow(l,t),h=a.pow(l,i);for(;!a.eql(d,a.ONE);){if(a.is0(d))return a.ZERO;let p=1,w=a.sqr(d);for(;!a.eql(w,a.ONE);)if(p++,w=a.sqr(w),p===u)throw new Error("Cannot find square root");let m=Ee<<BigInt(u-p-1),E=a.pow(f,m);u=p,f=a.sqr(E),d=a.mul(d,f),h=a.mul(h,E)}return h}}function La(e){return e%ai===ci?di:e%ui===li?Ia:e%fi===Pa?Ua(e):hi(e)}var $a=["create","isValid","is0","neg","inv","sqrt","sqr","eql","add","sub","mul","pow","div","addN","subN","mulN","sqrN"];function fo(e){let t={ORDER:"bigint",BYTES:"number",BITS:"number"},n=$a.reduce((r,o)=>(r[o]="function",r),t);return hn(e,n),e}function Oa(e,t,n){if(n<Pe)throw new Error("invalid exponent, negatives unsupported");if(n===Pe)return e.ONE;if(n===Ee)return t;let r=e.ONE,o=t;for(;n>Pe;)n&Ee&&(r=e.mul(r,o)),o=e.sqr(o),n>>=Ee;return r}function Yn(e,t,n=!1){let r=new Array(t.length).fill(n?e.ZERO:void 0),o=t.reduce((i,c,a)=>e.is0(c)?i:(r[a]=i,e.mul(i,c)),e.ONE),s=e.inv(o);return t.reduceRight((i,c,a)=>e.is0(c)?i:(r[a]=e.mul(i,r[a]),e.mul(i,c)),s),r}function ii(e,t){let n=(e.ORDER-Ee)/kt,r=e.pow(t,n),o=e.eql(r,e.ONE),s=e.eql(r,e.ZERO),i=e.eql(r,e.neg(e.ONE));if(!o&&!s&&!i)throw new Error("invalid Legendre symbol result");return o?1:s?0:-1}function Ca(e,t){t!==void 0&&re(t);let n=t!==void 0?t:e.toString(2).length,r=Math.ceil(n/8);return{nBitLength:n,nByteLength:r}}var lo=class{constructor(t,n={}){y(this,"ORDER");y(this,"BITS");y(this,"BYTES");y(this,"isLE");y(this,"ZERO",Pe);y(this,"ONE",Ee);y(this,"_lengths");y(this,"_sqrt");y(this,"_mod");if(t<=Pe)throw new Error("invalid field: expected ORDER > 0, got "+t);let r;this.isLE=!1,n!=null&&typeof n=="object"&&(typeof n.BITS=="number"&&(r=n.BITS),typeof n.sqrt=="function"&&(this.sqrt=n.sqrt),typeof n.isLE=="boolean"&&(this.isLE=n.isLE),n.allowedLengths&&(this._lengths=n.allowedLengths?.slice()),typeof n.modFromBytes=="boolean"&&(this._mod=n.modFromBytes));let{nBitLength:o,nByteLength:s}=Ca(t,r);if(s>2048)throw new Error("invalid field: expected ORDER of <= 2048 bytes");this.ORDER=t,this.BITS=o,this.BYTES=s,this._sqrt=void 0,Object.preventExtensions(this)}create(t){return We(t,this.ORDER)}isValid(t){if(typeof t!="bigint")throw new Error("invalid field element: expected bigint, got "+typeof t);return Pe<=t&&t<this.ORDER}is0(t){return t===Pe}isValidNot0(t){return!this.is0(t)&&this.isValid(t)}isOdd(t){return(t&Ee)===Ee}neg(t){return We(-t,this.ORDER)}eql(t,n){return t===n}sqr(t){return We(t*t,this.ORDER)}add(t,n){return We(t+n,this.ORDER)}sub(t,n){return We(t-n,this.ORDER)}mul(t,n){return We(t*n,this.ORDER)}pow(t,n){return Oa(this,t,n)}div(t,n){return We(t*si(n,this.ORDER),this.ORDER)}sqrN(t){return t*t}addN(t,n){return t+n}subN(t,n){return t-n}mulN(t,n){return t*n}inv(t){return si(t,this.ORDER)}sqrt(t){return this._sqrt||(this._sqrt=La(this.ORDER)),this._sqrt(this,t)}toBytes(t){return this.isLE?io(t,this.BYTES):Kt(t,this.BYTES)}fromBytes(t,n=!1){C(t);let{_lengths:r,BYTES:o,isLE:s,ORDER:i,_mod:c}=this;if(r){if(!r.includes(t.length)||t.length>o)throw new Error("Field.fromBytes: expected "+r+" bytes, got "+t.length);let l=new Uint8Array(o);l.set(t,s?0:l.length-t.length),t=l}if(t.length!==o)throw new Error("Field.fromBytes: expected "+o+" bytes, got "+t.length);let a=s?so(t):Le(t);if(c&&(a=We(a,i)),!n&&!this.isValid(a))throw new Error("invalid field element: outside of range 0..ORDER");return a}invertBatch(t){return Yn(this,t)}cmov(t,n,r){return r?n:t}};function Dt(e,t={}){return new lo(e,t)}function pi(e){if(typeof e!="bigint")throw new Error("field order must be bigint");let t=e.toString(2).length;return Math.ceil(t/8)}function ho(e){let t=pi(e);return t+Math.ceil(t/2)}function Fn(e,t,n=!1){C(e);let r=e.length,o=pi(t),s=ho(t);if(r<16||r<s||r>1024)throw new Error("expected "+s+"-1024 bytes of input, got "+r);let i=n?so(e):Le(e),c=We(i,t-Ee)+Ee;return n?io(c,o):Kt(c,o)}var Mt=BigInt(0),Bt=BigInt(1);function pn(e,t){let n=t.negate();return e?n:t}function yo(e,t){let n=Yn(e.Fp,t.map(r=>r.Z));return t.map((r,o)=>e.fromAffine(r.toAffine(n[o])))}function mi(e,t){if(!Number.isSafeInteger(e)||e<=0||e>t)throw new Error("invalid window size, expected [1.."+t+"], got W="+e)}function po(e,t){mi(e,t);let n=Math.ceil(t/e)+1,r=2**(e-1),o=2**e,s=dn(e),i=BigInt(e);return{windows:n,windowSize:r,mask:s,maxNumber:o,shiftBy:i}}function gi(e,t,n){let{windowSize:r,mask:o,maxNumber:s,shiftBy:i}=n,c=Number(e&o),a=e>>i;c>r&&(c-=s,a+=Bt);let l=t*r,u=l+Math.abs(c)-1,f=c===0,d=c<0,h=t%2!==0;return{nextN:a,offset:u,isZero:f,isNeg:d,isNegF:h,offsetF:l}}var go=new WeakMap,bi=new WeakMap;function wo(e){return bi.get(e)||1}function wi(e){if(e!==Mt)throw new Error("invalid wNAF")}var Gn=class{constructor(t,n){y(this,"BASE");y(this,"ZERO");y(this,"Fn");y(this,"bits");this.BASE=t.BASE,this.ZERO=t.ZERO,this.Fn=t.Fn,this.bits=n}_unsafeLadder(t,n,r=this.ZERO){let o=t;for(;n>Mt;)n&Bt&&(r=r.add(o)),o=o.double(),n>>=Bt;return r}precomputeWindow(t,n){let{windows:r,windowSize:o}=po(n,this.bits),s=[],i=t,c=i;for(let a=0;a<r;a++){c=i,s.push(c);for(let l=1;l<o;l++)c=c.add(i),s.push(c);i=c.double()}return s}wNAF(t,n,r){if(!this.Fn.isValid(r))throw new Error("invalid scalar");let o=this.ZERO,s=this.BASE,i=po(t,this.bits);for(let c=0;c<i.windows;c++){let{nextN:a,offset:l,isZero:u,isNeg:f,isNegF:d,offsetF:h}=gi(r,c,i);r=a,u?s=s.add(pn(d,n[h])):o=o.add(pn(f,n[l]))}return wi(r),{p:o,f:s}}wNAFUnsafe(t,n,r,o=this.ZERO){let s=po(t,this.bits);for(let i=0;i<s.windows&&r!==Mt;i++){let{nextN:c,offset:a,isZero:l,isNeg:u}=gi(r,i,s);if(r=c,!l){let f=n[a];o=o.add(u?f.negate():f)}}return wi(r),o}getPrecomputes(t,n,r){let o=go.get(n);return o||(o=this.precomputeWindow(n,t),t!==1&&(typeof r=="function"&&(o=r(o)),go.set(n,o))),o}cached(t,n,r){let o=wo(t);return this.wNAF(o,this.getPrecomputes(o,t,r),n)}unsafe(t,n,r,o){let s=wo(t);return s===1?this._unsafeLadder(t,n,o):this.wNAFUnsafe(s,this.getPrecomputes(s,t,r),n,o)}createCache(t,n){mi(n,this.bits),bi.set(t,n),go.delete(t)}hasCache(t){return wo(t)!==1}};function xi(e,t,n,r){let o=t,s=e.ZERO,i=e.ZERO;for(;n>Mt||r>Mt;)n&Bt&&(s=s.add(o)),r&Bt&&(i=i.add(o)),o=o.double(),n>>=Bt,r>>=Bt;return{p1:s,p2:i}}function yi(e,t,n){if(t){if(t.ORDER!==e)throw new Error("Field.ORDER must match order: Fp == p, Fn == n");return fo(t),t}else return Dt(e,{isLE:n})}function Ei(e,t,n={},r){if(r===void 0&&(r=e==="edwards"),!t||typeof t!="object")throw new Error(`expected valid ${e} CURVE object`);for(let a of["p","n","h"]){let l=t[a];if(!(typeof l=="bigint"&&l>Mt))throw new Error(`CURVE.${a} must be positive bigint`)}let o=yi(t.p,n.Fp,r),s=yi(t.n,n.Fn,r),c=["Gx","Gy","a",e==="weierstrass"?"b":"d"];for(let a of c)if(!o.isValid(t[a]))throw new Error(`CURVE.${a} must be valid field element of CURVE.Fp`);return t=Object.freeze(Object.assign({},t)),{CURVE:t,Fp:o,Fn:s}}function Zn(e,t){return function(r){let o=e(r);return{secretKey:o,publicKey:t(o)}}}var vi=(e,t)=>(e+(e>=0?t:-t)/Si)/t;function Ra(e,t,n){let[[r,o],[s,i]]=t,c=vi(i*e,n),a=vi(-o*e,n),l=e-c*r-a*s,u=-c*o-a*i,f=l<nt,d=u<nt;f&&(l=-l),d&&(u=-u);let h=dn(Math.ceil(co(n)/2))+Wt;if(l<nt||l>=h||u<nt||u>=h)throw new Error("splitScalar (endomorphism): failed, k="+e);return{k1neg:f,k1:l,k2neg:d,k2:u}}function bo(e){if(!["compact","recovered","der"].includes(e))throw new Error('Signature format must be "compact", "recovered", or "der"');return e}function mo(e,t){let n={};for(let r of Object.keys(t))n[r]=e[r]===void 0?t[r]:e[r];return un(n.lowS,"lowS"),un(n.prehash,"prehash"),n.format!==void 0&&bo(n.format),n}var xo=class extends Error{constructor(t=""){super(t)}},gt={Err:xo,_tlv:{encode:(e,t)=>{let{Err:n}=gt;if(e<0||e>256)throw new n("tlv.encode: wrong tag");if(t.length&1)throw new n("tlv.encode: unpadded data");let r=t.length/2,o=fn(r);if(o.length/2&128)throw new n("tlv.encode: long form length too big");let s=r>127?fn(o.length/2|128):"";return fn(e)+s+o+t},decode(e,t){let{Err:n}=gt,r=0;if(e<0||e>256)throw new n("tlv.encode: wrong tag");if(t.length<2||t[r++]!==e)throw new n("tlv.decode: wrong tlv");let o=t[r++],s=!!(o&128),i=0;if(!s)i=o;else{let a=o&127;if(!a)throw new n("tlv.decode(long): indefinite length not supported");if(a>4)throw new n("tlv.decode(long): byte length is too big");let l=t.subarray(r,r+a);if(l.length!==a)throw new n("tlv.decode: length bytes not complete");if(l[0]===0)throw new n("tlv.decode(long): zero leftmost byte");for(let u of l)i=i<<8|u;if(r+=a,i<128)throw new n("tlv.decode(long): not minimal encoding")}let c=t.subarray(r,r+i);if(c.length!==i)throw new n("tlv.decode: wrong value length");return{v:c,l:t.subarray(r+i)}}},_int:{encode(e){let{Err:t}=gt;if(e<nt)throw new t("integer: negative integers are not allowed");let n=fn(e);if(Number.parseInt(n[0],16)&8&&(n="00"+n),n.length&1)throw new t("unexpected DER parsing assertion: unpadded hex");return n},decode(e){let{Err:t}=gt;if(e[0]&128)throw new t("invalid signature integer: negative");if(e[0]===0&&!(e[1]&128))throw new t("invalid signature integer: unnecessary leading zero");return Le(e)}},toSig(e){let{Err:t,_int:n,_tlv:r}=gt,o=C(e,void 0,"signature"),{v:s,l:i}=r.decode(48,o);if(i.length)throw new t("invalid signature: left bytes after parsing");let{v:c,l:a}=r.decode(2,s),{v:l,l:u}=r.decode(2,a);if(u.length)throw new t("invalid signature: left bytes after parsing");return{r:n.decode(c),s:n.decode(l)}},hexFromSig(e){let{_tlv:t,_int:n}=gt,r=t.encode(2,n.encode(e.r)),o=t.encode(2,n.encode(e.s)),s=r+o;return t.encode(48,s)}},nt=BigInt(0),Wt=BigInt(1),Si=BigInt(2),Xn=BigInt(3),Na=BigInt(4);function ki(e,t={}){let n=Ei("weierstrass",e,t),{Fp:r,Fn:o}=n,s=n.CURVE,{h:i,n:c}=s;hn(t,{},{allowInfinityPoint:"boolean",clearCofactor:"function",isTorsionFree:"function",fromBytes:"function",toBytes:"function",endo:"object"});let{endo:a}=t;if(a&&(!r.is0(s.a)||typeof a.beta!="bigint"||!Array.isArray(a.basises)))throw new Error('invalid endo: expected "beta": bigint and "basises": array');let l=Ai(r,o);function u(){if(!r.isOdd)throw new Error("compression is not supported: Field does not have .isOdd()")}function f(R,x,b){let{x:S,y:A}=x.toAffine(),I=r.toBytes(S);if(un(b,"isCompressed"),b){u();let P=!r.isOdd(A);return ae(Bi(P),I)}else return ae(Uint8Array.of(4),I,r.toBytes(A))}function d(R){C(R,void 0,"Point");let{publicKey:x,publicKeyUncompressed:b}=l,S=R.length,A=R[0],I=R.subarray(1);if(S===x&&(A===2||A===3)){let P=r.fromBytes(I);if(!r.isValid(P))throw new Error("bad point: is not on curve, wrong x");let U=w(P),B;try{B=r.sqrt(U)}catch(de){let Q=de instanceof Error?": "+de.message:"";throw new Error("bad point: is not on curve, sqrt error"+Q)}u();let L=r.isOdd(B);return(A&1)===1!==L&&(B=r.neg(B)),{x:P,y:B}}else if(S===b&&A===4){let P=r.BYTES,U=r.fromBytes(I.subarray(0,P)),B=r.fromBytes(I.subarray(P,P*2));if(!m(U,B))throw new Error("bad point: is not on curve");return{x:U,y:B}}else throw new Error(`bad point: got length ${S}, expected compressed=${x} or uncompressed=${b}`)}let h=t.toBytes||f,p=t.fromBytes||d;function w(R){let x=r.sqr(R),b=r.mul(x,R);return r.add(r.add(b,r.mul(R,s.a)),s.b)}function m(R,x){let b=r.sqr(x),S=w(R);return r.eql(b,S)}if(!m(s.Gx,s.Gy))throw new Error("bad curve params: generator point");let E=r.mul(r.pow(s.a,Xn),Na),v=r.mul(r.sqr(s.b),BigInt(27));if(r.is0(r.add(E,v)))throw new Error("bad curve params: a or b");function k(R,x,b=!1){if(!r.isValid(x)||b&&r.is0(x))throw new Error(`bad point coordinate ${R}`);return x}function T(R){if(!(R instanceof M))throw new Error("Weierstrass Point expected")}function $(R){if(!a||!a.basises)throw new Error("no endo");return Ra(R,a.basises,o.ORDER)}let O=ao((R,x)=>{let{X:b,Y:S,Z:A}=R;if(r.eql(A,r.ONE))return{x:b,y:S};let I=R.is0();x==null&&(x=I?r.ONE:r.inv(A));let P=r.mul(b,x),U=r.mul(S,x),B=r.mul(A,x);if(I)return{x:r.ZERO,y:r.ZERO};if(!r.eql(B,r.ONE))throw new Error("invZ was invalid");return{x:P,y:U}}),te=ao(R=>{if(R.is0()){if(t.allowInfinityPoint&&!r.is0(R.Y))return;throw new Error("bad point: ZERO")}let{x,y:b}=R.toAffine();if(!r.isValid(x)||!r.isValid(b))throw new Error("bad point: x or y not field elements");if(!m(x,b))throw new Error("bad point: equation left != right");if(!R.isTorsionFree())throw new Error("bad point: not in prime-order subgroup");return!0});function G(R,x,b,S,A){return b=new M(r.mul(b.X,R),b.Y,b.Z),x=pn(S,x),b=pn(A,b),x.add(b)}let N=class N{constructor(x,b,S){y(this,"X");y(this,"Y");y(this,"Z");this.X=k("x",x),this.Y=k("y",b,!0),this.Z=k("z",S),Object.freeze(this)}static CURVE(){return s}static fromAffine(x){let{x:b,y:S}=x||{};if(!x||!r.isValid(b)||!r.isValid(S))throw new Error("invalid affine point");if(x instanceof N)throw new Error("projective point not allowed");return r.is0(b)&&r.is0(S)?N.ZERO:new N(b,S,r.ONE)}static fromBytes(x){let b=N.fromAffine(p(C(x,void 0,"point")));return b.assertValidity(),b}static fromHex(x){return N.fromBytes(et(x))}get x(){return this.toAffine().x}get y(){return this.toAffine().y}precompute(x=8,b=!0){return ce.createCache(this,x),b||this.multiply(Xn),this}assertValidity(){te(this)}hasEvenY(){let{y:x}=this.toAffine();if(!r.isOdd)throw new Error("Field doesn't support isOdd");return!r.isOdd(x)}equals(x){T(x);let{X:b,Y:S,Z:A}=this,{X:I,Y:P,Z:U}=x,B=r.eql(r.mul(b,U),r.mul(I,A)),L=r.eql(r.mul(S,U),r.mul(P,A));return B&&L}negate(){return new N(this.X,r.neg(this.Y),this.Z)}double(){let{a:x,b}=s,S=r.mul(b,Xn),{X:A,Y:I,Z:P}=this,U=r.ZERO,B=r.ZERO,L=r.ZERO,D=r.mul(A,A),de=r.mul(I,I),Q=r.mul(P,P),H=r.mul(A,I);return H=r.add(H,H),L=r.mul(A,P),L=r.add(L,L),U=r.mul(x,L),B=r.mul(S,Q),B=r.add(U,B),U=r.sub(de,B),B=r.add(de,B),B=r.mul(U,B),U=r.mul(H,U),L=r.mul(S,L),Q=r.mul(x,Q),H=r.sub(D,Q),H=r.mul(x,H),H=r.add(H,L),L=r.add(D,D),D=r.add(L,D),D=r.add(D,Q),D=r.mul(D,H),B=r.add(B,D),Q=r.mul(I,P),Q=r.add(Q,Q),D=r.mul(Q,H),U=r.sub(U,D),L=r.mul(Q,de),L=r.add(L,L),L=r.add(L,L),new N(U,B,L)}add(x){T(x);let{X:b,Y:S,Z:A}=this,{X:I,Y:P,Z:U}=x,B=r.ZERO,L=r.ZERO,D=r.ZERO,de=s.a,Q=r.mul(s.b,Xn),H=r.mul(b,I),ye=r.mul(S,P),Ae=r.mul(A,U),Ue=r.add(b,S),se=r.add(I,P);Ue=r.mul(Ue,se),se=r.add(H,ye),Ue=r.sub(Ue,se),se=r.add(b,A);let Te=r.add(I,U);return se=r.mul(se,Te),Te=r.add(H,Ae),se=r.sub(se,Te),Te=r.add(S,A),B=r.add(P,U),Te=r.mul(Te,B),B=r.add(ye,Ae),Te=r.sub(Te,B),D=r.mul(de,se),B=r.mul(Q,Ae),D=r.add(B,D),B=r.sub(ye,D),D=r.add(ye,D),L=r.mul(B,D),ye=r.add(H,H),ye=r.add(ye,H),Ae=r.mul(de,Ae),se=r.mul(Q,se),ye=r.add(ye,Ae),Ae=r.sub(H,Ae),Ae=r.mul(de,Ae),se=r.add(se,Ae),H=r.mul(ye,se),L=r.add(L,H),H=r.mul(Te,se),B=r.mul(Ue,B),B=r.sub(B,H),H=r.mul(Ue,ye),D=r.mul(Te,D),D=r.add(D,H),new N(B,L,D)}subtract(x){return this.add(x.negate())}is0(){return this.equals(N.ZERO)}multiply(x){let{endo:b}=t;if(!o.isValidNot0(x))throw new Error("invalid scalar: out of range");let S,A,I=P=>ce.cached(this,P,U=>yo(N,U));if(b){let{k1neg:P,k1:U,k2neg:B,k2:L}=$(x),{p:D,f:de}=I(U),{p:Q,f:H}=I(L);A=de.add(H),S=G(b.beta,D,Q,P,B)}else{let{p:P,f:U}=I(x);S=P,A=U}return yo(N,[S,A])[0]}multiplyUnsafe(x){let{endo:b}=t,S=this;if(!o.isValid(x))throw new Error("invalid scalar: out of range");if(x===nt||S.is0())return N.ZERO;if(x===Wt)return S;if(ce.hasCache(this))return this.multiply(x);if(b){let{k1neg:A,k1:I,k2neg:P,k2:U}=$(x),{p1:B,p2:L}=xi(N,S,I,U);return G(b.beta,B,L,A,P)}else return ce.unsafe(S,x)}toAffine(x){return O(this,x)}isTorsionFree(){let{isTorsionFree:x}=t;return i===Wt?!0:x?x(N,this):ce.unsafe(this,c).is0()}clearCofactor(){let{clearCofactor:x}=t;return i===Wt?this:x?x(N,this):this.multiplyUnsafe(i)}isSmallOrder(){return this.multiplyUnsafe(i).is0()}toBytes(x=!0){return un(x,"isCompressed"),this.assertValidity(),h(N,this,x)}toHex(x=!0){return Me(this.toBytes(x))}toString(){return`<Point ${this.is0()?"ZERO":this.toHex()}>`}};y(N,"BASE",new N(s.Gx,s.Gy,r.ONE)),y(N,"ZERO",new N(r.ZERO,r.ONE,r.ZERO)),y(N,"Fp",r),y(N,"Fn",o);let M=N,we=o.BITS,ce=new Gn(M,t.endo?Math.ceil(we/2):we);return M.BASE.precompute(8),M}function Bi(e){return Uint8Array.of(e?2:3)}function Ai(e,t){return{secretKey:t.BYTES,publicKey:1+e.BYTES,publicKeyUncompressed:1+2*e.BYTES,publicKeyHasPrefix:!0,signature:2*t.BYTES}}function _a(e,t={}){let{Fn:n}=e,r=t.randomBytes||ut,o=Object.assign(Ai(e.Fp,n),{seed:ho(n.ORDER)});function s(h){try{let p=n.fromBytes(h);return n.isValidNot0(p)}catch{return!1}}function i(h,p){let{publicKey:w,publicKeyUncompressed:m}=o;try{let E=h.length;return p===!0&&E!==w||p===!1&&E!==m?!1:!!e.fromBytes(h)}catch{return!1}}function c(h=r(o.seed)){return Fn(C(h,o.seed,"seed"),n.ORDER)}function a(h,p=!0){return e.BASE.multiply(n.fromBytes(h)).toBytes(p)}function l(h){let{secretKey:p,publicKey:w,publicKeyUncompressed:m}=o;if(!Jt(h)||"_lengths"in n&&n._lengths||p===w)return;let E=C(h,void 0,"key").length;return E===w||E===m}function u(h,p,w=!0){if(l(h)===!0)throw new Error("first arg must be private key");if(l(p)===!1)throw new Error("second arg must be public key");let m=n.fromBytes(h);return e.fromBytes(p).multiply(m).toBytes(w)}let f={isValidSecretKey:s,isValidPublicKey:i,randomSecretKey:c},d=Zn(c,a);return Object.freeze({getPublicKey:a,getSharedSecret:u,keygen:d,Point:e,utils:f,lengths:o})}function Ti(e,t,n={}){Rt(t),hn(n,{},{hmac:"function",lowS:"boolean",randomBytes:"function",bits2int:"function",bits2int_modN:"function"}),n=Object.assign({},n);let r=n.randomBytes||ut,o=n.hmac||((x,b)=>ft(t,x,b)),{Fp:s,Fn:i}=e,{ORDER:c,BITS:a}=i,{keygen:l,getPublicKey:u,getSharedSecret:f,utils:d,lengths:h}=_a(e,n),p={prehash:!0,lowS:typeof n.lowS=="boolean"?n.lowS:!0,format:"compact",extraEntropy:!1},w=c*Si<s.ORDER;function m(x){let b=c>>Wt;return x>b}function E(x,b){if(!i.isValidNot0(b))throw new Error(`invalid signature ${x}: out of range 1..Point.Fn.ORDER`);return b}function v(){if(w)throw new Error('"recovered" sig type is not supported for cofactor >2 curves')}function k(x,b){bo(b);let S=h.signature,A=b==="compact"?S:b==="recovered"?S+1:void 0;return C(x,A)}class T{constructor(b,S,A){y(this,"r");y(this,"s");y(this,"recovery");if(this.r=E("r",b),this.s=E("s",S),A!=null){if(v(),![0,1,2,3].includes(A))throw new Error("invalid recovery id");this.recovery=A}Object.freeze(this)}static fromBytes(b,S=p.format){k(b,S);let A;if(S==="der"){let{r:B,s:L}=gt.toSig(C(b));return new T(B,L)}S==="recovered"&&(A=b[0],S="compact",b=b.subarray(1));let I=h.signature/2,P=b.subarray(0,I),U=b.subarray(I,I*2);return new T(i.fromBytes(P),i.fromBytes(U),A)}static fromHex(b,S){return this.fromBytes(et(b),S)}assertRecovery(){let{recovery:b}=this;if(b==null)throw new Error("invalid recovery id: must be present");return b}addRecoveryBit(b){return new T(this.r,this.s,b)}recoverPublicKey(b){let{r:S,s:A}=this,I=this.assertRecovery(),P=I===2||I===3?S+c:S;if(!s.isValid(P))throw new Error("invalid recovery id: sig.r+curve.n != R.x");let U=s.toBytes(P),B=e.fromBytes(ae(Bi((I&1)===0),U)),L=i.inv(P),D=O(C(b,void 0,"msgHash")),de=i.create(-D*L),Q=i.create(A*L),H=e.BASE.multiplyUnsafe(de).add(B.multiplyUnsafe(Q));if(H.is0())throw new Error("invalid recovery: point at infinify");return H.assertValidity(),H}hasHighS(){return m(this.s)}toBytes(b=p.format){if(bo(b),b==="der")return et(gt.hexFromSig(this));let{r:S,s:A}=this,I=i.toBytes(S),P=i.toBytes(A);return b==="recovered"?(v(),ae(Uint8Array.of(this.assertRecovery()),I,P)):ae(I,P)}toHex(b){return Me(this.toBytes(b))}}let $=n.bits2int||function(b){if(b.length>8192)throw new Error("input is too large");let S=Le(b),A=b.length*8-a;return A>0?S>>BigInt(A):S},O=n.bits2int_modN||function(b){return i.create($(b))},te=dn(a);function G(x){return ri("num < 2^"+a,x,nt,te),i.toBytes(x)}function M(x,b){return C(x,void 0,"message"),b?C(t(x),void 0,"prehashed message"):x}function we(x,b,S){let{lowS:A,prehash:I,extraEntropy:P}=mo(S,p);x=M(x,I);let U=O(x),B=i.fromBytes(b);if(!i.isValidNot0(B))throw new Error("invalid private key");let L=[G(B),G(U)];if(P!=null&&P!==!1){let H=P===!0?r(h.secretKey):P;L.push(C(H,void 0,"extraEntropy"))}let D=ae(...L),de=U;function Q(H){let ye=$(H);if(!i.isValidNot0(ye))return;let Ae=i.inv(ye),Ue=e.BASE.multiply(ye).toAffine(),se=i.create(Ue.x);if(se===nt)return;let Te=i.create(Ae*i.create(de+se*B));if(Te===nt)return;let Bs=(Ue.x===se?0:2)|Number(Ue.y&Wt),As=Te;return A&&m(Te)&&(As=i.neg(Te),Bs^=1),new T(se,As,w?void 0:Bs)}return{seed:D,k2sig:Q}}function ce(x,b,S={}){let{seed:A,k2sig:I}=we(x,b,S);return oi(t.outputLen,i.BYTES,o)(A,I).toBytes(S.format)}function N(x,b,S,A={}){let{lowS:I,prehash:P,format:U}=mo(A,p);if(S=C(S,void 0,"publicKey"),b=M(b,P),!Jt(x)){let B=x instanceof T?", use sig.toBytes()":"";throw new Error("verify expects Uint8Array signature"+B)}k(x,U);try{let B=T.fromBytes(x,U),L=e.fromBytes(S);if(I&&B.hasHighS())return!1;let{r:D,s:de}=B,Q=O(b),H=i.inv(de),ye=i.create(Q*H),Ae=i.create(D*H),Ue=e.BASE.multiplyUnsafe(ye).add(L.multiplyUnsafe(Ae));return Ue.is0()?!1:i.create(Ue.x)===D}catch{return!1}}function R(x,b,S={}){let{prehash:A}=mo(S,p);return b=M(b,A),T.fromBytes(x,"recovered").recoverPublicKey(b).toBytes()}return Object.freeze({keygen:l,getPublicKey:u,getSharedSecret:f,utils:d,lengths:h,Point:e,sign:ce,verify:N,recoverPublicKey:R,Signature:T,hash:t})}var er={p:BigInt("0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"),n:BigInt("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"),h:BigInt(1),a:BigInt(0),b:BigInt(7),Gx:BigInt("0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),Gy:BigInt("0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8")},Ha={beta:BigInt("0x7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee"),basises:[[BigInt("0x3086d221a7d46bcde86c90e49284eb15"),-BigInt("0xe4437ed6010e88286f547fa90abfe4c3")],[BigInt("0x114ca50f7a8e2f3f657c1108d9d44cfd8"),BigInt("0x3086d221a7d46bcde86c90e49284eb15")]]},Ka=BigInt(0),Eo=BigInt(2);function Da(e){let t=er.p,n=BigInt(3),r=BigInt(6),o=BigInt(11),s=BigInt(22),i=BigInt(23),c=BigInt(44),a=BigInt(88),l=e*e*e%t,u=l*l*e%t,f=$e(u,n,t)*u%t,d=$e(f,n,t)*u%t,h=$e(d,Eo,t)*l%t,p=$e(h,o,t)*h%t,w=$e(p,s,t)*p%t,m=$e(w,c,t)*w%t,E=$e(m,a,t)*m%t,v=$e(E,c,t)*w%t,k=$e(v,n,t)*u%t,T=$e(k,i,t)*p%t,$=$e(T,r,t)*l%t,O=$e($,Eo,t);if(!Qn.eql(Qn.sqr(O),e))throw new Error("Cannot find square root");return O}var Qn=Dt(er.p,{sqrt:Da}),At=ki(er,{Fp:Qn,endo:Ha}),Ie=Ti(At,q),Pi={};function Jn(e,...t){let n=Pi[e];if(n===void 0){let r=q(ni(e));n=ae(r,r),Pi[e]=n}return q(ae(n,...t))}var So=e=>e.toBytes(!0).slice(1),ko=e=>e%Eo===Ka;function vo(e){let{Fn:t,BASE:n}=At,r=t.fromBytes(e),o=n.multiply(r);return{scalar:ko(o.y)?r:t.neg(r),bytes:So(o)}}function Ui(e){let t=Qn;if(!t.isValidNot0(e))throw new Error("invalid x: Fail if x \u2265 p");let n=t.create(e*e),r=t.create(n*e+BigInt(7)),o=t.sqrt(r);ko(o)||(o=t.neg(o));let s=At.fromAffine({x:e,y:o});return s.assertValidity(),s}var gn=Le;function Li(...e){return At.Fn.create(gn(Jn("BIP0340/challenge",...e)))}function Ii(e){return vo(e).bytes}function Ma(e,t,n=ut(32)){let{Fn:r}=At,o=C(e,void 0,"message"),{bytes:s,scalar:i}=vo(t),c=C(n,32,"auxRand"),a=r.toBytes(i^gn(Jn("BIP0340/aux",c))),l=Jn("BIP0340/nonce",a,s,o),{bytes:u,scalar:f}=vo(l),d=Li(u,s,o),h=new Uint8Array(64);if(h.set(u,0),h.set(r.toBytes(r.create(f+d*i)),32),!$i(h,o,s))throw new Error("sign: Invalid signature produced");return h}function $i(e,t,n){let{Fp:r,Fn:o,BASE:s}=At,i=C(e,64,"signature"),c=C(t,void 0,"message"),a=C(n,32,"publicKey");try{let l=Ui(gn(a)),u=gn(i.subarray(0,32));if(!r.isValidNot0(u))return!1;let f=gn(i.subarray(32,64));if(!o.isValidNot0(f))return!1;let d=Li(o.toBytes(u),So(l),c),h=s.multiplyUnsafe(f).add(l.multiplyUnsafe(o.neg(d))),{x:p,y:w}=h.toAffine();return!(h.is0()||!ko(w)||p!==u)}catch{return!1}}var rt=(()=>{let n=(r=ut(48))=>Fn(r,er.n);return{keygen:Zn(n,Ii),getPublicKey:Ii,sign:Ma,verify:$i,Point:At,utils:{randomSecretKey:n,taggedHash:Jn,lift_x:Ui,pointToBytes:So},lengths:{secretKey:32,publicKey:32,publicKeyHasPrefix:!1,signature:64,seed:48}}})();var Wa=Uint8Array.from([7,4,13,1,10,6,15,3,12,0,9,5,2,14,11,8]),Ci=Uint8Array.from(new Array(16).fill(0).map((e,t)=>t)),Va=Ci.map(e=>(9*e+5)%16),Ri=(()=>{let n=[[Ci],[Va]];for(let r=0;r<4;r++)for(let o of n)o.push(o[r].map(s=>Wa[s]));return n})(),Ni=Ri[0],_i=Ri[1],Hi=[[11,14,15,12,5,8,7,9,11,13,14,15,6,7,9,8],[12,13,11,15,6,9,9,7,12,15,11,13,7,8,7,7],[13,15,14,11,7,7,6,8,13,14,13,12,5,5,6,9],[14,11,12,14,8,6,5,5,15,12,15,14,9,9,8,6],[15,12,13,13,9,5,8,6,14,11,12,11,8,6,5,5]].map(e=>Uint8Array.from(e)),qa=Ni.map((e,t)=>e.map(n=>Hi[t][n])),za=_i.map((e,t)=>e.map(n=>Hi[t][n])),ja=Uint32Array.from([0,1518500249,1859775393,2400959708,2840853838]),Ya=Uint32Array.from([1352829926,1548603684,1836072691,2053994217,0]);function Oi(e,t,n,r){return e===0?t^n^r:e===1?t&n|~t&r:e===2?(t|~n)^r:e===3?t&r|n&~r:t^(n|~r)}var tr=new Uint32Array(16),Bo=class extends xt{constructor(){super(64,20,8,!0);y(this,"h0",1732584193);y(this,"h1",-271733879);y(this,"h2",-1732584194);y(this,"h3",271733878);y(this,"h4",-1009589776)}get(){let{h0:n,h1:r,h2:o,h3:s,h4:i}=this;return[n,r,o,s,i]}set(n,r,o,s,i){this.h0=n|0,this.h1=r|0,this.h2=o|0,this.h3=s|0,this.h4=i|0}process(n,r){for(let p=0;p<16;p++,r+=4)tr[p]=n.getUint32(r,!0);let o=this.h0|0,s=o,i=this.h1|0,c=i,a=this.h2|0,l=a,u=this.h3|0,f=u,d=this.h4|0,h=d;for(let p=0;p<5;p++){let w=4-p,m=ja[p],E=Ya[p],v=Ni[p],k=_i[p],T=qa[p],$=za[p];for(let O=0;O<16;O++){let te=_(o+Oi(p,i,a,u)+tr[v[O]]+m,T[O])+d|0;o=d,d=u,u=_(a,10)|0,a=i,i=te}for(let O=0;O<16;O++){let te=_(s+Oi(w,c,l,f)+tr[k[O]]+E,$[O])+h|0;s=h,h=f,f=_(l,10)|0,l=c,c=te}}this.set(this.h1+a+f|0,this.h2+u+h|0,this.h3+d+s|0,this.h4+o+c|0,this.h0+i+l|0)}roundClean(){xe(tr)}destroy(){this.destroyed=!0,xe(this.buffer),this.set(0,0,0,0,0)}},nr=en(()=>new Bo);var yn=Ie.Point,{Fn:wn}=yn,Ao=Vn(q),Fa=Uint8Array.from("Bitcoin seed".split(""),e=>e.charCodeAt(0)),To={private:76066276,public:76067358},Po=2147483648,Ga=e=>nr(q(e)),Za=e=>ze(e).getUint32(0,!1),rr=e=>{if(!Number.isSafeInteger(e)||e<0||e>2**32-1)throw new Error("invalid number, should be from 0 to 2**32-1, got "+e);let t=new Uint8Array(4);return ze(t).setUint32(0,e,!1),t},or=class e{constructor(t){y(this,"versions");y(this,"depth",0);y(this,"index",0);y(this,"chainCode",null);y(this,"parentFingerprint",0);y(this,"_privateKey");y(this,"_publicKey");y(this,"pubHash");if(!t||typeof t!="object")throw new Error("HDKey.constructor must not be called directly");if(this.versions=t.versions||To,this.depth=t.depth||0,this.chainCode=t.chainCode||null,this.index=t.index||0,this.parentFingerprint=t.parentFingerprint||0,!this.depth&&(this.parentFingerprint||this.index))throw new Error("HDKey: zero depth with non-zero index/parent fingerprint");if(this.depth>255)throw new Error("HDKey: depth exceeds the serializable value 255");if(t.publicKey&&t.privateKey)throw new Error("HDKey: publicKey and privateKey at same time.");if(t.privateKey){if(!Ie.utils.isValidSecretKey(t.privateKey))throw new Error("Invalid private key");this._privateKey=t.privateKey,this._publicKey=Ie.getPublicKey(t.privateKey,!0)}else if(t.publicKey)this._publicKey=yn.fromBytes(t.publicKey).toBytes(!0);else throw new Error("HDKey: no public or private key provided");this.pubHash=Ga(this._publicKey)}get fingerprint(){if(!this.pubHash)throw new Error("No publicKey set!");return Za(this.pubHash)}get identifier(){return this.pubHash}get pubKeyHash(){return this.pubHash}get privateKey(){return this._privateKey||null}get publicKey(){return this._publicKey||null}get privateExtendedKey(){let t=this._privateKey;if(!t)throw new Error("No private key");return Ao.encode(this.serialize(this.versions.private,ae(Uint8Array.of(0),t)))}get publicExtendedKey(){if(!this._publicKey)throw new Error("No public key");return Ao.encode(this.serialize(this.versions.public,this._publicKey))}static fromMasterSeed(t,n=To){if(C(t),8*t.length<128||8*t.length>512)throw new Error("HDKey: seed length must be between 128 and 512 bits; 256 bits is advised, got "+t.length);let r=ft(on,Fa,t),o=r.slice(0,32),s=r.slice(32);return new e({versions:n,chainCode:s,privateKey:o})}static fromExtendedKey(t,n=To){let r=Ao.decode(t),o=ze(r),s=o.getUint32(0,!1),i={versions:n,depth:r[4],parentFingerprint:o.getUint32(5,!1),index:o.getUint32(9,!1),chainCode:r.slice(13,45)},c=r.slice(45),a=c[0]===0;if(s!==n[a?"private":"public"])throw new Error("Version mismatch");return a?new e({...i,privateKey:c.slice(1)}):new e({...i,publicKey:c})}static fromJSON(t){return e.fromExtendedKey(t.xpriv)}derive(t){if(!/^[mM]'?/.test(t))throw new Error('Path must start with "m" or "M"');if(/^[mM]'?$/.test(t))return this;let n=t.replace(/^[mM]'?\//,"").split("/"),r=this;for(let o of n){let s=/^(\d+)('?)$/.exec(o),i=s&&s[1];if(!s||s.length!==3||typeof i!="string")throw new Error("invalid child index: "+o);let c=+i;if(!Number.isSafeInteger(c)||c>=Po)throw new Error("Invalid index");s[2]==="'"&&(c+=Po),r=r.deriveChild(c)}return r}deriveChild(t){if(!this._publicKey||!this.chainCode)throw new Error("No publicKey or chainCode set");let n=rr(t);if(t>=Po){let a=this._privateKey;if(!a)throw new Error("Could not derive hardened child key");n=ae(Uint8Array.of(0),a,n)}else n=ae(this._publicKey,n);let r=ft(on,this.chainCode,n),o=r.slice(0,32),s=r.slice(32);if(!Ie.utils.isValidSecretKey(o))throw new Error("Tweak bigger than curve order");let i={versions:this.versions,chainCode:s,depth:this.depth+1,parentFingerprint:this.fingerprint,index:t},c=wn.fromBytes(o);try{if(this._privateKey){let a=wn.create(wn.fromBytes(this._privateKey)+c);if(!wn.isValidNot0(a))throw new Error("The tweak was out of range or the resulted private key is invalid");i.privateKey=wn.toBytes(a)}else{let a=yn.fromBytes(this._publicKey).add(yn.BASE.multiply(c));if(a.equals(yn.ZERO))throw new Error("The tweak was equal to negative P, which made the result key invalid");i.publicKey=a.toBytes(!0)}return new e(i)}catch{return this.deriveChild(t+1)}}sign(t){if(!this._privateKey)throw new Error("No privateKey set!");return C(t,32),Ie.sign(t,this._privateKey,{prehash:!1})}verify(t,n){if(C(t,32),C(n,64),!this._publicKey)throw new Error("No publicKey set!");return Ie.verify(n,t,this._publicKey,{prehash:!1})}wipePrivateData(){return this._privateKey&&(this._privateKey.fill(0),this._privateKey=void 0),this}toJSON(){return{xpriv:this.privateExtendedKey,xpub:this.publicExtendedKey}}serialize(t,n){if(!this.chainCode)throw new Error("No chainCode set");return C(n,33),ae(rr(t),new Uint8Array([this.depth]),rr(this.parentFingerprint),rr(this.index),this.chainCode,n)}};var z=Uint8Array.of(),$o=Uint8Array.of(0);function Vt(e,t){if(e.length!==t.length)return!1;for(let n=0;n<e.length;n++)if(e[n]!==t[n])return!1;return!0}function Ne(e){return e instanceof Uint8Array||ArrayBuffer.isView(e)&&e.constructor.name==="Uint8Array"}function Xa(...e){let t=0;for(let r=0;r<e.length;r++){let o=e[r];if(!Ne(o))throw new Error("Uint8Array expected");t+=o.length}let n=new Uint8Array(t);for(let r=0,o=0;r<e.length;r++){let s=e[r];n.set(s,o),o+=s.length}return n}var Oo=e=>new DataView(e.buffer,e.byteOffset,e.byteLength);function qt(e){return Object.prototype.toString.call(e)==="[object Object]"}function Ye(e){return Number.isSafeInteger(e)}var sr={equalBytes:Vt,isBytes:Ne,isCoder:Oe,checkBounds:Di,concatBytes:Xa,createView:Oo,isPlainObject:qt},Ki=e=>{if(e!==null&&typeof e!="string"&&!Oe(e)&&!Ne(e)&&!Ye(e))throw new Error(`lengthCoder: expected null | number | Uint8Array | CoderType, got ${e} (${typeof e})`);return{encodeStream(t,n){if(e===null)return;if(Oe(e))return e.encodeStream(t,n);let r;if(typeof e=="number"?r=e:typeof e=="string"&&(r=ot.resolve(t.stack,e)),typeof r=="bigint"&&(r=Number(r)),r===void 0||r!==n)throw t.err(`Wrong length: ${r} len=${e} exp=${n} (${typeof n})`)},decodeStream(t){let n;if(Oe(e)?n=Number(e.decodeStream(t)):typeof e=="number"?n=e:typeof e=="string"&&(n=ot.resolve(t.stack,e)),typeof n=="bigint"&&(n=Number(n)),typeof n!="number")throw t.err(`Wrong length: ${n}`);return n}}},he={BITS:32,FULL_MASK:-1>>>0,len:e=>Math.ceil(e/32),create:e=>new Uint32Array(he.len(e)),clean:e=>e.fill(0),debug:e=>Array.from(e).map(t=>(t>>>0).toString(2).padStart(32,"0")),checkLen:(e,t)=>{if(he.len(t)!==e.length)throw new Error(`wrong length=${e.length}. Expected: ${he.len(t)}`)},chunkLen:(e,t,n)=>{if(t<0)throw new Error(`wrong pos=${t}`);if(t+n>e)throw new Error(`wrong range=${t}/${n} of ${e}`)},set:(e,t,n,r=!0)=>!r&&(e[t]&n)!==0?!1:(e[t]|=n,!0),pos:(e,t)=>({chunk:Math.floor((e+t)/32),mask:1<<32-(e+t)%32-1}),indices:(e,t,n=!1)=>{he.checkLen(e,t);let{FULL_MASK:r,BITS:o}=he,s=o-t%o,i=s?r>>>s<<s:r,c=[];for(let a=0;a<e.length;a++){let l=e[a];if(n&&(l=~l),a===e.length-1&&(l&=i),l!==0)for(let u=0;u<o;u++){let f=1<<o-u-1;l&f&&c.push(a*o+u)}}return c},range:e=>{let t=[],n;for(let r of e)n===void 0||r!==n.pos+n.length?t.push(n={pos:r,length:1}):n.length+=1;return t},rangeDebug:(e,t,n=!1)=>`[${he.range(he.indices(e,t,n)).map(r=>`(${r.pos}/${r.length})`).join(", ")}]`,setRange:(e,t,n,r,o=!0)=>{he.chunkLen(t,n,r);let{FULL_MASK:s,BITS:i}=he,c=n%i?Math.floor(n/i):void 0,a=n+r,l=a%i?Math.floor(a/i):void 0;if(c!==void 0&&c===l)return he.set(e,c,s>>>i-r<<i-r-n,o);if(c!==void 0&&!he.set(e,c,s>>>n%i,o))return!1;let u=c!==void 0?c+1:n/i,f=l!==void 0?l:a/i;for(let d=u;d<f;d++)if(!he.set(e,d,s,o))return!1;return!(l!==void 0&&c!==l&&!he.set(e,l,s<<i-a%i,o))}},ot={pushObj:(e,t,n)=>{let r={obj:t};e.push(r),n((o,s)=>{r.field=o,s(),r.field=void 0}),e.pop()},path:e=>{let t=[];for(let n of e)n.field!==void 0&&t.push(n.field);return t.join("/")},err:(e,t,n)=>{let r=new Error(`${e}(${ot.path(t)}): ${typeof n=="string"?n:n.message}`);return n instanceof Error&&n.stack&&(r.stack=n.stack),r},resolve:(e,t)=>{let n=t.split("/"),r=e.map(i=>i.obj),o=0;for(;o<n.length&&n[o]==="..";o++)r.pop();let s=r.pop();for(;o<n.length;o++){if(!s||s[n[o]]===void 0)return;s=s[n[o]]}return s}},Io=class e{constructor(t,n={},r=[],o=void 0,s=0){y(this,"pos",0);y(this,"data");y(this,"opts");y(this,"stack");y(this,"parent");y(this,"parentOffset");y(this,"bitBuf",0);y(this,"bitPos",0);y(this,"bs");y(this,"view");this.data=t,this.opts=n,this.stack=r,this.parent=o,this.parentOffset=s,this.view=Oo(t)}_enablePointers(){if(this.parent)return this.parent._enablePointers();this.bs||(this.bs=he.create(this.data.length),he.setRange(this.bs,this.data.length,0,this.pos,this.opts.allowMultipleReads))}markBytesBS(t,n){return this.parent?this.parent.markBytesBS(this.parentOffset+t,n):!n||!this.bs?!0:he.setRange(this.bs,this.data.length,t,n,!1)}markBytes(t){let n=this.pos;this.pos+=t;let r=this.markBytesBS(n,t);if(!this.opts.allowMultipleReads&&!r)throw this.err(`multiple read pos=${this.pos} len=${t}`);return r}pushObj(t,n){return ot.pushObj(this.stack,t,n)}readView(t,n){if(!Number.isFinite(t))throw this.err(`readView: wrong length=${t}`);if(this.pos+t>this.data.length)throw this.err("readView: Unexpected end of buffer");let r=n(this.view,this.pos);return this.markBytes(t),r}absBytes(t){if(t>this.data.length)throw new Error("Unexpected end of buffer");return this.data.subarray(t)}finish(){if(!this.opts.allowUnreadBytes){if(this.bitPos)throw this.err(`${this.bitPos} bits left after unpack: ${F.encode(this.data.slice(this.pos))}`);if(this.bs&&!this.parent){let t=he.indices(this.bs,this.data.length,!0);if(t.length){let n=he.range(t).map(({pos:r,length:o})=>`(${r}/${o})[${F.encode(this.data.subarray(r,r+o))}]`).join(", ");throw this.err(`unread byte ranges: ${n} (total=${this.data.length})`)}else return}if(!this.isEnd())throw this.err(`${this.leftBytes} bytes ${this.bitPos} bits left after unpack: ${F.encode(this.data.slice(this.pos))}`)}}err(t){return ot.err("Reader",this.stack,t)}offsetReader(t){if(t>this.data.length)throw this.err("offsetReader: Unexpected end of buffer");return new e(this.absBytes(t),this.opts,this.stack,this,t)}bytes(t,n=!1){if(this.bitPos)throw this.err("readBytes: bitPos not empty");if(!Number.isFinite(t))throw this.err(`readBytes: wrong length=${t}`);if(this.pos+t>this.data.length)throw this.err("readBytes: Unexpected end of buffer");let r=this.data.subarray(this.pos,this.pos+t);return n||this.markBytes(t),r}byte(t=!1){if(this.bitPos)throw this.err("readByte: bitPos not empty");if(this.pos+1>this.data.length)throw this.err("readBytes: Unexpected end of buffer");let n=this.data[this.pos];return t||this.markBytes(1),n}get leftBytes(){return this.data.length-this.pos}get totalBytes(){return this.data.length}isEnd(){return this.pos>=this.data.length&&!this.bitPos}bits(t){if(t>32)throw this.err("BitReader: cannot read more than 32 bits in single call");let n=0;for(;t;){this.bitPos||(this.bitBuf=this.byte(),this.bitPos=8);let r=Math.min(t,this.bitPos);this.bitPos-=r,n=n<<r|this.bitBuf>>this.bitPos&2**r-1,this.bitBuf&=2**this.bitPos-1,t-=r}return n>>>0}find(t,n=this.pos){if(!Ne(t))throw this.err(`find: needle is not bytes! ${t}`);if(this.bitPos)throw this.err("findByte: bitPos not empty");if(!t.length)throw this.err("find: needle is empty");for(let r=n;(r=this.data.indexOf(t[0],r))!==-1;r++){if(r===-1||this.data.length-r<t.length)return;if(Vt(t,this.data.subarray(r,r+t.length)))return r}}},Uo=class{constructor(t=[]){y(this,"pos",0);y(this,"stack");y(this,"buffers",[]);y(this,"ptrs",[]);y(this,"bitBuf",0);y(this,"bitPos",0);y(this,"viewBuf",new Uint8Array(8));y(this,"view");y(this,"finished",!1);this.stack=t,this.view=Oo(this.viewBuf)}pushObj(t,n){return ot.pushObj(this.stack,t,n)}writeView(t,n){if(this.finished)throw this.err("buffer: finished");if(!Ye(t)||t>8)throw new Error(`wrong writeView length=${t}`);n(this.view),this.bytes(this.viewBuf.slice(0,t)),this.viewBuf.fill(0)}err(t){if(this.finished)throw this.err("buffer: finished");return ot.err("Reader",this.stack,t)}bytes(t){if(this.finished)throw this.err("buffer: finished");if(this.bitPos)throw this.err("writeBytes: ends with non-empty bit buffer");this.buffers.push(t),this.pos+=t.length}byte(t){if(this.finished)throw this.err("buffer: finished");if(this.bitPos)throw this.err("writeByte: ends with non-empty bit buffer");this.buffers.push(new Uint8Array([t])),this.pos++}finish(t=!0){if(this.finished)throw this.err("buffer: finished");if(this.bitPos)throw this.err("buffer: ends with non-empty bit buffer");let n=this.buffers.concat(this.ptrs.map(s=>s.buffer)),r=n.map(s=>s.length).reduce((s,i)=>s+i,0),o=new Uint8Array(r);for(let s=0,i=0;s<n.length;s++){let c=n[s];o.set(c,i),i+=c.length}for(let s=this.pos,i=0;i<this.ptrs.length;i++){let c=this.ptrs[i];o.set(c.ptr.encode(s),c.pos),s+=c.buffer.length}if(t){this.buffers=[];for(let s of this.ptrs)s.buffer.fill(0);this.ptrs=[],this.finished=!0,this.bitBuf=0}return o}bits(t,n){if(n>32)throw this.err("writeBits: cannot write more than 32 bits in single call");if(t>=2**n)throw this.err(`writeBits: value (${t}) >= 2**bits (${n})`);for(;n;){let r=Math.min(n,8-this.bitPos);this.bitBuf=this.bitBuf<<r|t>>n-r,this.bitPos+=r,n-=r,t&=2**n-1,this.bitPos===8&&(this.bitPos=0,this.buffers.push(new Uint8Array([this.bitBuf])),this.pos++)}}},Lo=e=>Uint8Array.from(e).reverse();function Di(e,t,n){if(n){let r=2n**(t-1n);if(e<-r||e>=r)throw new Error(`value out of signed bounds. Expected ${-r} <= ${e} < ${r}`)}else if(0n>e||e>=2n**t)throw new Error(`value out of unsigned bounds. Expected 0 <= ${e} < ${2n**t}`)}function Mi(e){return{encodeStream:e.encodeStream,decodeStream:e.decodeStream,size:e.size,encode:t=>{let n=new Uo;return e.encodeStream(n,t),n.finish()},decode:(t,n={})=>{let r=new Io(t,n),o=e.decodeStream(r);return r.finish(),o}}}function ve(e,t){if(!Oe(e))throw new Error(`validate: invalid inner value ${e}`);if(typeof t!="function")throw new Error("validate: fn should be function");return Mi({size:e.size,encodeStream:(n,r)=>{let o;try{o=t(r)}catch(s){throw n.err(s)}e.encodeStream(n,o)},decodeStream:n=>{let r=e.decodeStream(n);try{return t(r)}catch(o){throw n.err(o)}}})}var Se=e=>{let t=Mi(e);return e.validate?ve(t,e.validate):t},ir=e=>qt(e)&&typeof e.decode=="function"&&typeof e.encode=="function";function Oe(e){return qt(e)&&ir(e)&&typeof e.encodeStream=="function"&&typeof e.decodeStream=="function"&&(e.size===void 0||Ye(e.size))}function Qa(){return{encode:e=>{if(!Array.isArray(e))throw new Error("array expected");let t={};for(let n of e){if(!Array.isArray(n)||n.length!==2)throw new Error("array of two elements expected");let r=n[0],o=n[1];if(t[r]!==void 0)throw new Error(`key(${r}) appears twice in struct`);t[r]=o}return t},decode:e=>{if(!qt(e))throw new Error(`expected plain object, got ${e}`);return Object.entries(e)}}}var Ja={encode:e=>{if(typeof e!="bigint")throw new Error(`expected bigint, got ${typeof e}`);if(e>BigInt(Number.MAX_SAFE_INTEGER))throw new Error(`element bigger than MAX_SAFE_INTEGER=${e}`);return Number(e)},decode:e=>{if(!Ye(e))throw new Error("element is not a safe integer");return BigInt(e)}};function el(e){if(!qt(e))throw new Error("plain object expected");return{encode:t=>{if(!Ye(t)||!(t in e))throw new Error(`wrong value ${t}`);return e[t]},decode:t=>{if(typeof t!="string")throw new Error(`wrong value ${typeof t}`);return e[t]}}}function tl(e,t=!1){if(!Ye(e))throw new Error(`decimal/precision: wrong value ${e}`);if(typeof t!="boolean")throw new Error(`decimal/round: expected boolean, got ${typeof t}`);let n=10n**BigInt(e);return{encode:r=>{if(typeof r!="bigint")throw new Error(`expected bigint, got ${typeof r}`);let o=(r<0n?-r:r).toString(10),s=o.length-e;s<0&&(o=o.padStart(o.length-s,"0"),s=0);let i=o.length-1;for(;i>=s&&o[i]==="0";i--);let c=o.slice(0,s),a=o.slice(s,i+1);return c||(c="0"),r<0n&&(c="-"+c),a?`${c}.${a}`:c},decode:r=>{if(typeof r!="string")throw new Error(`expected string, got ${typeof r}`);if(r==="-0")throw new Error("negative zero is not allowed");let o=!1;if(r.startsWith("-")&&(o=!0,r=r.slice(1)),!/^(0|[1-9]\d*)(\.\d+)?$/.test(r))throw new Error(`wrong string value=${r}`);let s=r.indexOf(".");s=s===-1?r.length:s;let i=r.slice(0,s),c=r.slice(s+1).replace(/0+$/,""),a=BigInt(i)*n;if(!t&&c.length>e)throw new Error(`fractional part cannot be represented with this precision (num=${r}, prec=${e})`);let l=Math.min(c.length,e),u=BigInt(c.slice(0,l))*10n**BigInt(e-l),f=a+u;return o?-f:f}}}function nl(e){if(!Array.isArray(e))throw new Error(`expected array, got ${typeof e}`);for(let t of e)if(!ir(t))throw new Error(`wrong base coder ${t}`);return{encode:t=>{for(let n of e){let r=n.encode(t);if(r!==void 0)return r}throw new Error(`match/encode: cannot find match in ${t}`)},decode:t=>{for(let n of e){let r=n.decode(t);if(r!==void 0)return r}throw new Error(`match/decode: cannot find match in ${t}`)}}}var Wi=e=>{if(!ir(e))throw new Error("BaseCoder expected");return{encode:e.decode,decode:e.encode}},wt={dict:Qa,numberBigint:Ja,tsEnum:el,decimal:tl,match:nl,reverse:Wi};var Co=(e,t=!1,n=!1,r=!0)=>{if(!Ye(e))throw new Error(`bigint/size: wrong value ${e}`);if(typeof t!="boolean")throw new Error(`bigint/le: expected boolean, got ${typeof t}`);if(typeof n!="boolean")throw new Error(`bigint/signed: expected boolean, got ${typeof n}`);if(typeof r!="boolean")throw new Error(`bigint/sized: expected boolean, got ${typeof r}`);let o=BigInt(e),s=2n**(8n*o-1n);return Se({size:r?e:void 0,encodeStream:(i,c)=>{n&&c<0&&(c=c|s);let a=[];for(let u=0;u<e;u++)a.push(Number(c&255n)),c>>=8n;let l=new Uint8Array(a).reverse();if(!r){let u=0;for(u=0;u<l.length&&l[u]===0;u++);l=l.subarray(u)}i.bytes(t?l.reverse():l)},decodeStream:i=>{let c=i.bytes(r?e:Math.min(e,i.leftBytes)),a=t?c:Lo(c),l=0n;for(let u=0;u<a.length;u++)l|=BigInt(a[u])<<8n*BigInt(u);return n&&l&s&&(l=(l^s)-s),l},validate:i=>{if(typeof i!="bigint")throw new Error(`bigint: invalid value: ${i}`);return Di(i,8n*o,!!n),i}})};var Vi=Co(32,!1);var zt=Co(8,!0);var qi=Co(8,!0,!0);var rl=(e,t)=>Se({size:e,encodeStream:(n,r)=>n.writeView(e,o=>t.write(o,r)),decodeStream:n=>n.readView(e,t.read),validate:n=>{if(typeof n!="number")throw new Error(`viewCoder: expected number, got ${typeof n}`);return t.validate&&t.validate(n),n}}),mn=(e,t,n)=>{let r=e*8,o=2**(r-1),s=a=>{if(!Ye(a))throw new Error(`sintView: value is not safe integer: ${a}`);if(a<-o||a>=o)throw new Error(`sintView: value out of bounds. Expected ${-o} <= ${a} < ${o}`)},i=2**r,c=a=>{if(!Ye(a))throw new Error(`uintView: value is not safe integer: ${a}`);if(0>a||a>=i)throw new Error(`uintView: value out of bounds. Expected 0 <= ${a} < ${i}`)};return rl(e,{write:n.write,read:n.read,validate:t?s:c})},V=mn(4,!1,{read:(e,t)=>e.getUint32(t,!0),write:(e,t)=>e.setUint32(0,t,!0)}),zi=mn(4,!1,{read:(e,t)=>e.getUint32(t,!1),write:(e,t)=>e.setUint32(0,t,!1)}),yt=mn(4,!0,{read:(e,t)=>e.getInt32(t,!0),write:(e,t)=>e.setInt32(0,t,!0)});var Ro=mn(2,!1,{read:(e,t)=>e.getUint16(t,!0),write:(e,t)=>e.setUint16(0,t,!0)});var Ve=mn(1,!1,{read:(e,t)=>e.getUint8(t),write:(e,t)=>e.setUint8(0,t)});var X=(e,t=!1)=>{if(typeof t!="boolean")throw new Error(`bytes/le: expected boolean, got ${typeof t}`);let n=Ki(e),r=Ne(e);return Se({size:typeof e=="number"?e:void 0,encodeStream:(o,s)=>{r||n.encodeStream(o,s.length),o.bytes(t?Lo(s):s),r&&o.bytes(e)},decodeStream:o=>{let s;if(r){let i=o.find(e);if(!i)throw o.err("bytes: cannot find terminator");s=o.bytes(i-o.pos),o.bytes(e.length)}else s=o.bytes(e===null?o.leftBytes:n.decodeStream(o));return t?Lo(s):s},validate:o=>{if(!Ne(o))throw new Error(`bytes: invalid value ${o}`);return o}})};function ji(e,t){if(!Oe(t))throw new Error(`prefix: invalid inner value ${t}`);return Fe(X(e),Wi(t))}var cr=(e,t=!1)=>ve(Fe(X(e,t),Ys),n=>{if(typeof n!="string")throw new Error(`expected string, got ${typeof n}`);return n});var Yi=(e,t={isLE:!1,with0x:!1})=>{let n=Fe(X(e,t.isLE),F),r=t.with0x;if(typeof r!="boolean")throw new Error(`hex/with0x: expected boolean, got ${typeof r}`);return r&&(n=Fe(n,{encode:o=>`0x${o}`,decode:o=>{if(!o.startsWith("0x"))throw new Error("hex(with0x=true).encode input should start with 0x");return o.slice(2)}})),n};function Fe(e,t){if(!Oe(e))throw new Error(`apply: invalid inner value ${e}`);if(!ir(t))throw new Error(`apply: invalid base value ${e}`);return Se({size:e.size,encodeStream:(n,r)=>{let o;try{o=t.decode(r)}catch(s){throw n.err(""+s)}return e.encodeStream(n,o)},decodeStream:n=>{let r=e.decodeStream(n);try{return t.encode(r)}catch(o){throw n.err(""+o)}}})}var Fi=(e,t=!1)=>{if(!Ne(e))throw new Error(`flag/flagValue: expected Uint8Array, got ${typeof e}`);if(typeof t!="boolean")throw new Error(`flag/xor: expected boolean, got ${typeof t}`);return Se({size:e.length,encodeStream:(n,r)=>{!!r!==t&&n.bytes(e)},decodeStream:n=>{let r=n.leftBytes>=e.length;return r&&(r=Vt(n.bytes(e.length,!0),e),r&&n.bytes(e.length)),r!==t},validate:n=>{if(n!==void 0&&typeof n!="boolean")throw new Error(`flag: expected boolean value or undefined, got ${typeof n}`);return n}})};function Gi(e,t,n){if(!Oe(t))throw new Error(`flagged: invalid inner value ${t}`);if(typeof e!="string"&&!Oe(t))throw new Error(`flagged: wrong path=${e}`);return Se({encodeStream:(r,o)=>{typeof e=="string"?ot.resolve(r.stack,e)?t.encodeStream(r,o):n&&t.encodeStream(r,n):(e.encodeStream(r,!!o),o?t.encodeStream(r,o):n&&t.encodeStream(r,n))},decodeStream:r=>{let o=!1;if(typeof e=="string"?o=!!ot.resolve(r.stack,e):o=e.decodeStream(r),o)return t.decodeStream(r);n&&t.decodeStream(r)}})}function ar(e,t,n=!0){if(!Oe(e))throw new Error(`magic: invalid inner value ${e}`);if(typeof n!="boolean")throw new Error(`magic: expected boolean, got ${typeof n}`);return Se({size:e.size,encodeStream:(r,o)=>e.encodeStream(r,t),decodeStream:r=>{let o=e.decodeStream(r);if(n&&typeof o!="object"&&o!==t||Ne(t)&&!Vt(t,o))throw r.err(`magic: invalid value: ${o} !== ${t}`)},validate:r=>{if(r!==void 0)throw new Error(`magic: wrong value=${typeof r}`);return r}})}function Zi(e){let t=0;for(let n of e){if(n.size===void 0)return;if(!Ye(n.size))throw new Error(`sizeof: wrong element size=${t}`);t+=n.size}return t}function le(e){if(!qt(e))throw new Error(`struct: expected plain object, got ${e}`);for(let t in e)if(!Oe(e[t]))throw new Error(`struct: field ${t} is not CoderType`);return Se({size:Zi(Object.values(e)),encodeStream:(t,n)=>{t.pushObj(n,r=>{for(let o in e)r(o,()=>e[o].encodeStream(t,n[o]))})},decodeStream:t=>{let n={};return t.pushObj(n,r=>{for(let o in e)r(o,()=>n[o]=e[o].decodeStream(t))}),n},validate:t=>{if(typeof t!="object"||t===null)throw new Error(`struct: invalid value ${t}`);return t}})}function Xi(e){if(!Array.isArray(e))throw new Error(`Packed.Tuple: got ${typeof e} instead of array`);for(let t=0;t<e.length;t++)if(!Oe(e[t]))throw new Error(`tuple: field ${t} is not CoderType`);return Se({size:Zi(e),encodeStream:(t,n)=>{if(!Array.isArray(n))throw t.err(`tuple: invalid value ${n}`);t.pushObj(n,r=>{for(let o=0;o<e.length;o++)r(`${o}`,()=>e[o].encodeStream(t,n[o]))})},decodeStream:t=>{let n=[];return t.pushObj(n,r=>{for(let o=0;o<e.length;o++)r(`${o}`,()=>n.push(e[o].decodeStream(t)))}),n},validate:t=>{if(!Array.isArray(t))throw new Error(`tuple: invalid value ${t}`);if(t.length!==e.length)throw new Error(`tuple: wrong length=${t.length}, expected ${e.length}`);return t}})}function ke(e,t){if(!Oe(t))throw new Error(`array: invalid inner value ${t}`);let n=Ki(typeof e=="string"?`../${e}`:e);return Se({size:typeof e=="number"&&t.size?e*t.size:void 0,encodeStream:(r,o)=>{let s=r;s.pushObj(o,i=>{Ne(e)||n.encodeStream(r,o.length);for(let c=0;c<o.length;c++)i(`${c}`,()=>{let a=o[c],l=r.pos;if(t.encodeStream(r,a),Ne(e)){if(e.length>s.pos-l)return;let u=s.finish(!1).subarray(l,s.pos);if(Vt(u.subarray(0,e.length),e))throw s.err(`array: inner element encoding same as separator. elm=${a} data=${u}`)}})}),Ne(e)&&r.bytes(e)},decodeStream:r=>{let o=[];return r.pushObj(o,s=>{if(e===null)for(let i=0;!r.isEnd()&&(s(`${i}`,()=>o.push(t.decodeStream(r))),!(t.size&&r.leftBytes<t.size));i++);else if(Ne(e))for(let i=0;;i++){if(Vt(r.bytes(e.length,!0),e)){r.bytes(e.length);break}s(`${i}`,()=>o.push(t.decodeStream(r)))}else{let i;s("arrayLen",()=>i=n.decodeStream(r));for(let c=0;c<i;c++)s(`${c}`,()=>o.push(t.decodeStream(r)))}}),o},validate:r=>{if(!Array.isArray(r))throw new Error(`array: invalid value ${r}`);return r}})}var jt=Ie.Point,Qi=jt.Fn,ec=jt.Fn.ORDER,tc=e=>e%2n===0n,W=sr.isBytes,st=sr.concatBytes,ie=sr.equalBytes;var Tt=e=>nr(q(e)),it=(...e)=>q(q(st(...e))),ld=rt.utils.randomSecretKey,lr=rt.getPublicKey,No=Ie.getPublicKey,Ji=e=>e.r<ec/2n;function nc(e,t,n=!1){let r=Ie.Signature.fromBytes(Ie.sign(e,t,{prehash:!1}));if(n&&!Ji(r)){let o=new Uint8Array(32),s=0;for(;!Ji(r);)if(o.set(V.encode(s++)),r=Ie.Signature.fromBytes(Ie.sign(e,t,{prehash:!1,extraEntropy:o})),s>4294967295)throw new Error("lowR counter overflow: report the error")}return r.toBytes("der")}var _o=rt.sign,ur=rt.utils.taggedHash,pe={ecdsa:0,schnorr:1};function Ge(e,t){let n=e.length;if(t===pe.ecdsa){if(n===32)throw new Error("Expected non-Schnorr key");return jt.fromBytes(e),e}else if(t===pe.schnorr){if(n!==32)throw new Error("Expected 32-byte Schnorr key");return rt.utils.lift_x(Le(e)),e}else throw new Error("Unknown key type")}function rc(e,t){let r=rt.utils.taggedHash("TapTweak",e,t),o=Le(r);if(o>=ec)throw new Error("tweak higher than curve order");return o}function oc(e,t=Uint8Array.of()){let n=rt.utils,r=Le(e),o=jt.BASE.multiply(r),s=tc(o.y)?r:Qi.neg(r),i=n.pointToBytes(o),c=rc(i,t);return Kt(Qi.add(s,c),32)}function Ho(e,t){let n=rt.utils,r=rc(e,t),s=n.lift_x(Le(e)).add(jt.BASE.multiply(r)),i=tc(s.y)?0:1;return[n.pointToBytes(s),i]}var Ko=q(jt.BASE.toBytes(!1)),_e={bech32:"bc",pubKeyHash:0,scriptHash:5,wif:128};function Pt(e,t){if(!W(e)||!W(t))throw new Error(`cmp: wrong type a=${typeof e} b=${typeof t}`);let n=Math.min(e.length,t.length);for(let r=0;r<n;r++)if(e[r]!=t[r])return Math.sign(e[r]-t[r]);return Math.sign(e.length-t.length)}function fr(e){let t={};for(let n in e){if(t[e[n]]!==void 0)throw new Error("duplicate key");t[e[n]]=n}return t}var be={OP_0:0,PUSHDATA1:76,PUSHDATA2:77,PUSHDATA4:78,"1NEGATE":79,RESERVED:80,OP_1:81,OP_2:82,OP_3:83,OP_4:84,OP_5:85,OP_6:86,OP_7:87,OP_8:88,OP_9:89,OP_10:90,OP_11:91,OP_12:92,OP_13:93,OP_14:94,OP_15:95,OP_16:96,NOP:97,VER:98,IF:99,NOTIF:100,VERIF:101,VERNOTIF:102,ELSE:103,ENDIF:104,VERIFY:105,RETURN:106,TOALTSTACK:107,FROMALTSTACK:108,"2DROP":109,"2DUP":110,"3DUP":111,"2OVER":112,"2ROT":113,"2SWAP":114,IFDUP:115,DEPTH:116,DROP:117,DUP:118,NIP:119,OVER:120,PICK:121,ROLL:122,ROT:123,SWAP:124,TUCK:125,CAT:126,SUBSTR:127,LEFT:128,RIGHT:129,SIZE:130,INVERT:131,AND:132,OR:133,XOR:134,EQUAL:135,EQUALVERIFY:136,RESERVED1:137,RESERVED2:138,"1ADD":139,"1SUB":140,"2MUL":141,"2DIV":142,NEGATE:143,ABS:144,NOT:145,"0NOTEQUAL":146,ADD:147,SUB:148,MUL:149,DIV:150,MOD:151,LSHIFT:152,RSHIFT:153,BOOLAND:154,BOOLOR:155,NUMEQUAL:156,NUMEQUALVERIFY:157,NUMNOTEQUAL:158,LESSTHAN:159,GREATERTHAN:160,LESSTHANOREQUAL:161,GREATERTHANOREQUAL:162,MIN:163,MAX:164,WITHIN:165,RIPEMD160:166,SHA1:167,SHA256:168,HASH160:169,HASH256:170,CODESEPARATOR:171,CHECKSIG:172,CHECKSIGVERIFY:173,CHECKMULTISIG:174,CHECKMULTISIGVERIFY:175,NOP1:176,CHECKLOCKTIMEVERIFY:177,CHECKSEQUENCEVERIFY:178,NOP4:179,NOP5:180,NOP6:181,NOP7:182,NOP8:183,NOP9:184,NOP10:185,CHECKSIGADD:186,INVALID:255},ol=fr(be);function cc(e=6,t=!1){return Se({encodeStream:(n,r)=>{if(r===0n)return;let o=r<0,s=BigInt(r),i=[];for(let c=o?-s:s;c;c>>=8n)i.push(Number(c&0xffn));i[i.length-1]>=128?i.push(o?128:0):o&&(i[i.length-1]|=128),n.bytes(new Uint8Array(i))},decodeStream:n=>{let r=n.leftBytes;if(r>e)throw new Error(`ScriptNum: number (${r}) bigger than limit=${e}`);if(r===0)return 0n;if(t){let i=n.bytes(r,!0);if((i[i.length-1]&127)===0&&(r<=1||(i[i.length-2]&128)===0))throw new Error("Non-minimally encoded ScriptNum")}let o=0,s=0n;for(let i=0;i<r;++i)o=n.byte(),s|=BigInt(o)<<8n*BigInt(i);return o>=128&&(s&=2n**BigInt(r*8)-1n>>1n,s=-s),s}})}function ac(e,t=4,n=!0){if(typeof e=="number")return e;if(W(e))try{let r=cc(t,n).decode(e);return r>Number.MAX_SAFE_INTEGER?void 0:Number(r)}catch{return}}var j=Se({encodeStream:(e,t)=>{for(let n of t){if(typeof n=="string"){if(be[n]===void 0)throw new Error(`Unknown opcode=${n}`);e.byte(be[n]);continue}else if(typeof n=="number"){if(n===0){e.byte(0);continue}else if(1<=n&&n<=16){e.byte(be.OP_1-1+n);continue}}if(typeof n=="number"&&(n=cc().encode(BigInt(n))),!W(n))throw new Error(`Wrong Script OP=${n} (${typeof n})`);let r=n.length;r<be.PUSHDATA1?e.byte(r):r<=255?(e.byte(be.PUSHDATA1),e.byte(r)):r<=65535?(e.byte(be.PUSHDATA2),e.bytes(Ro.encode(r))):(e.byte(be.PUSHDATA4),e.bytes(V.encode(r))),e.bytes(n)}},decodeStream:e=>{let t=[];for(;!e.isEnd();){let n=e.byte();if(be.OP_0<n&&n<=be.PUSHDATA4){let r;if(n<be.PUSHDATA1)r=n;else if(n===be.PUSHDATA1)r=Ve.decodeStream(e);else if(n===be.PUSHDATA2)r=Ro.decodeStream(e);else if(n===be.PUSHDATA4)r=V.decodeStream(e);else throw new Error("Should be not possible");t.push(e.bytes(r))}else if(n===0)t.push(0);else if(be.OP_1<=n&&n<=be.OP_16)t.push(n-(be.OP_1-1));else{let r=ol[n];if(r===void 0)throw new Error(`Unknown opcode=${n.toString(16)}`);t.push(r)}}return t}}),ic={253:[253,2,253n,65535n],254:[254,4,65536n,4294967295n],255:[255,8,4294967296n,18446744073709551615n]},xn=Se({encodeStream:(e,t)=>{if(typeof t=="number"&&(t=BigInt(t)),0n<=t&&t<=252n)return e.byte(Number(t));for(let[n,r,o,s]of Object.values(ic))if(!(o>t||t>s)){e.byte(n);for(let i=0;i<r;i++)e.byte(Number(t>>8n*BigInt(i)&0xffn));return}throw e.err(`VarInt too big: ${t}`)},decodeStream:e=>{let t=e.byte();if(t<=252)return BigInt(t);let[n,r,o]=ic[t],s=0n;for(let i=0;i<r;i++)s|=BigInt(e.byte())<<8n*BigInt(i);if(s<o)throw e.err(`Wrong CompactSize(${8*r})`);return s}}),ue=Fe(xn,wt.numberBigint),ge=X(xn),It=ke(ue,ge),dr=e=>ke(xn,e),lc=le({txid:X(32,!0),index:V,finalScriptSig:ge,sequence:V}),ct=le({amount:zt,script:ge}),sl=le({version:yt,segwitFlag:Fi(new Uint8Array([0,1])),inputs:dr(lc),outputs:dr(ct),witnesses:Gi("segwitFlag",ke("inputs/length",It)),lockTime:V});function il(e){if(e.segwitFlag&&e.witnesses&&!e.witnesses.length)throw new Error("Segwit flag with empty witnesses array");return e}var mt=ve(sl,il),Ut=le({version:yt,inputs:dr(lc),outputs:dr(ct),lockTime:V});var Mo=ve(X(null),e=>Ge(e,pe.ecdsa)),hr=ve(X(32),e=>Ge(e,pe.schnorr)),uc=ve(X(null),e=>{if(e.length!==64&&e.length!==65)throw new Error("Schnorr signature should be 64 or 65 bytes long");return e}),pr=le({fingerprint:zi,path:ke(null,V)}),hc=le({hashes:ke(ue,X(32)),der:pr}),cl=X(78),al=le({pubKey:hr,leafHash:X(32)}),ll=le({version:Ve,internalKey:X(32),merklePath:ke(null,X(32))}),bt=ve(ll,e=>{if(e.merklePath.length>128)throw new Error("TaprootControlBlock: merklePath should be of length 0..128 (inclusive)");return e}),ul=ke(null,le({depth:Ve,version:Ve,script:ge})),fe=X(null),fc=X(20),En=X(32),gr={unsignedTx:[0,!1,Ut,[0],[0],!1],xpub:[1,cl,pr,[],[0,2],!1],txVersion:[2,!1,V,[2],[2],!1],fallbackLocktime:[3,!1,V,[],[2],!1],inputCount:[4,!1,ue,[2],[2],!1],outputCount:[5,!1,ue,[2],[2],!1],txModifiable:[6,!1,Ve,[],[2],!1],version:[251,!1,V,[],[0,2],!1],proprietary:[252,fe,fe,[],[0,2],!1]},vn={nonWitnessUtxo:[0,!1,mt,[],[0,2],!1],witnessUtxo:[1,!1,ct,[],[0,2],!1],partialSig:[2,Mo,fe,[],[0,2],!1],sighashType:[3,!1,V,[],[0,2],!1],redeemScript:[4,!1,fe,[],[0,2],!1],witnessScript:[5,!1,fe,[],[0,2],!1],bip32Derivation:[6,Mo,pr,[],[0,2],!1],finalScriptSig:[7,!1,fe,[],[0,2],!1],finalScriptWitness:[8,!1,It,[],[0,2],!1],porCommitment:[9,!1,fe,[],[0,2],!1],ripemd160:[10,fc,fe,[],[0,2],!1],sha256:[11,En,fe,[],[0,2],!1],hash160:[12,fc,fe,[],[0,2],!1],hash256:[13,En,fe,[],[0,2],!1],txid:[14,!1,En,[2],[2],!0],index:[15,!1,V,[2],[2],!0],sequence:[16,!1,V,[],[2],!0],requiredTimeLocktime:[17,!1,V,[],[2],!1],requiredHeightLocktime:[18,!1,V,[],[2],!1],tapKeySig:[19,!1,uc,[],[0,2],!1],tapScriptSig:[20,al,uc,[],[0,2],!1],tapLeafScript:[21,bt,fe,[],[0,2],!1],tapBip32Derivation:[22,En,hc,[],[0,2],!1],tapInternalKey:[23,!1,hr,[],[0,2],!1],tapMerkleRoot:[24,!1,En,[],[0,2],!1],proprietary:[252,fe,fe,[],[0,2],!1]},pc=["txid","sequence","index","witnessUtxo","nonWitnessUtxo","finalScriptSig","finalScriptWitness","unknown"],gc=["partialSig","finalScriptSig","finalScriptWitness","tapKeySig","tapScriptSig"],Sn={redeemScript:[0,!1,fe,[],[0,2],!1],witnessScript:[1,!1,fe,[],[0,2],!1],bip32Derivation:[2,Mo,pr,[],[0,2],!1],amount:[3,!1,qi,[2],[2],!0],script:[4,!1,fe,[2],[2],!0],tapInternalKey:[5,!1,hr,[],[0,2],!1],tapTree:[6,!1,ul,[],[0,2],!1],tapBip32Derivation:[7,hr,hc,[],[0,2],!1],proprietary:[252,fe,fe,[],[0,2],!1]},wc=[],dc=ke($o,le({key:ji(ue,le({type:ue,key:X(null)})),value:X(ue)}));function Wo(e){let[t,n,r,o,s,i]=e;return{type:t,kc:n,vc:r,reqInc:o,allowInc:s,silentIgnore:i}}var gd=le({type:ue,key:X(null)});function Vo(e){let t={};for(let n in e){let[r,o,s]=e[n];t[r]=[n,o,s]}return Se({encodeStream:(n,r)=>{let o=[];for(let s in e){let i=r[s];if(i===void 0)continue;let[c,a,l]=e[s];if(!a)o.push({key:{type:c,key:z},value:l.encode(i)});else{let u=i.map(([f,d])=>[a.encode(f),l.encode(d)]);u.sort((f,d)=>Pt(f[0],d[0]));for(let[f,d]of u)o.push({key:{key:f,type:c},value:d})}}if(r.unknown){r.unknown.sort((s,i)=>Pt(s[0].key,i[0].key));for(let[s,i]of r.unknown)o.push({key:s,value:i})}dc.encodeStream(n,o)},decodeStream:n=>{let r=dc.decodeStream(n),o={},s={};for(let i of r){let c="unknown",a=i.key.key,l=i.value;if(t[i.key.type]){let[u,f,d]=t[i.key.type];if(c=u,!f&&a.length)throw new Error(`PSBT: Non-empty key for ${c} (key=${F.encode(a)} value=${F.encode(l)}`);if(a=f?f.decode(a):void 0,l=d.decode(l),!f){if(o[c])throw new Error(`PSBT: Same keys: ${c} (key=${a} value=${l})`);o[c]=l,s[c]=!0;continue}}else a={type:i.key.type,key:i.key.key};if(s[c])throw new Error(`PSBT: Key type with empty key and no key=${c} val=${l}`);o[c]||(o[c]=[]),o[c].push([a,l])}return o}})}var wr=ve(Vo(vn),e=>{if(e.finalScriptWitness&&!e.finalScriptWitness.length)throw new Error("validateInput: empty finalScriptWitness");if(e.partialSig&&!e.partialSig.length)throw new Error("Empty partialSig");if(e.partialSig)for(let[t]of e.partialSig)Ge(t,pe.ecdsa);if(e.bip32Derivation)for(let[t]of e.bip32Derivation)Ge(t,pe.ecdsa);if(e.requiredTimeLocktime!==void 0&&e.requiredTimeLocktime<5e8)throw new Error(`validateInput: wrong timeLocktime=${e.requiredTimeLocktime}`);if(e.requiredHeightLocktime!==void 0&&(e.requiredHeightLocktime<=0||e.requiredHeightLocktime>=5e8))throw new Error(`validateInput: wrong heighLocktime=${e.requiredHeightLocktime}`);if(e.tapLeafScript)for(let[t,n]of e.tapLeafScript){if((t.version&254)!==n[n.length-1])throw new Error("validateInput: tapLeafScript version mimatch");if(n[n.length-1]&1)throw new Error("validateInput: tapLeafScript version has parity bit!")}return e}),yr=ve(Vo(Sn),e=>{if(e.bip32Derivation)for(let[t]of e.bip32Derivation)Ge(t,pe.ecdsa);return e}),yc=ve(Vo(gr),e=>{if((e.version||0)===0){if(!e.unsignedTx)throw new Error("PSBTv0: missing unsignedTx");for(let n of e.unsignedTx.inputs)if(n.finalScriptSig&&n.finalScriptSig.length)throw new Error("PSBTv0: input scriptSig found in unsignedTx")}return e}),fl=le({magic:ar(cr(new Uint8Array([255])),"psbt"),global:yc,inputs:ke("global/unsignedTx/inputs/length",wr),outputs:ke(null,yr)}),dl=le({magic:ar(cr(new Uint8Array([255])),"psbt"),global:yc,inputs:ke("global/inputCount",wr),outputs:ke("global/outputCount",yr)}),wd=le({magic:ar(cr(new Uint8Array([255])),"psbt"),items:ke(null,Fe(ke($o,Xi([Yi(ue),X(xn)])),wt.dict()))});function Do(e,t,n){for(let r in n){if(r==="unknown"||!t[r])continue;let{allowInc:o}=Wo(t[r]);if(!o.includes(e))throw new Error(`PSBTv${e}: field ${r} is not allowed`)}for(let r in t){let{reqInc:o}=Wo(t[r]);if(o.includes(e)&&n[r]===void 0)throw new Error(`PSBTv${e}: missing required field ${r}`)}}function qo(e,t,n){let r={};for(let o in n){let s=o;if(s!=="unknown"){if(!t[s])continue;let{allowInc:i,silentIgnore:c}=Wo(t[s]);if(!i.includes(e)){if(c)continue;throw new Error(`Failed to serialize in PSBTv${e}: ${s} but versions allows inclusion=${i}`)}}r[s]=n[s]}return r}function mc(e){let t=e&&e.global&&e.global.version||0;Do(t,gr,e.global);for(let i of e.inputs)Do(t,vn,i);for(let i of e.outputs)Do(t,Sn,i);let n=t?e.global.inputCount:e.global.unsignedTx.inputs.length;if(e.inputs.length<n)throw new Error("Not enough inputs");let r=e.inputs.slice(n);if(r.length>1||r.length&&Object.keys(r[0]).length)throw new Error(`Unexpected inputs left in tx=${r}`);let o=t?e.global.outputCount:e.global.unsignedTx.outputs.length;if(e.outputs.length<o)throw new Error("Not outputs inputs");let s=e.outputs.slice(o);if(s.length>1||s.length&&Object.keys(s[0]).length)throw new Error(`Unexpected outputs left in tx=${s}`);return e}function mr(e,t,n,r,o){let s={...n,...t};for(let i in e){let c=i,[a,l,u]=e[c],f=r&&!r.includes(i);if(t[i]===void 0&&i in t){if(f)throw new Error(`Cannot remove signed field=${i}`);delete s[i]}else if(l){let d=n&&n[i]?n[i]:[],h=t[c];if(h){if(!Array.isArray(h))throw new Error(`keyMap(${i}): KV pairs should be [k, v][]`);h=h.map(m=>{if(m.length!==2)throw new Error(`keyMap(${i}): KV pairs should be [k, v][]`);return[typeof m[0]=="string"?l.decode(F.decode(m[0])):m[0],typeof m[1]=="string"?u.decode(F.decode(m[1])):m[1]]});let p={},w=(m,E,v)=>{if(p[m]===void 0){p[m]=[E,v];return}let k=F.encode(u.encode(p[m][1])),T=F.encode(u.encode(v));if(k!==T)throw new Error(`keyMap(${c}): same key=${m} oldVal=${k} newVal=${T}`)};for(let[m,E]of d){let v=F.encode(l.encode(m));w(v,m,E)}for(let[m,E]of h){let v=F.encode(l.encode(m));if(E===void 0){if(f)throw new Error(`Cannot remove signed field=${c}/${m}`);delete p[v]}else w(v,m,E)}s[c]=Object.values(p)}}else if(typeof s[i]=="string")s[i]=u.decode(F.decode(s[i]));else if(f&&i in t&&n&&n[i]!==void 0&&!ie(u.encode(t[i]),u.encode(n[i])))throw new Error(`Cannot change signed field=${i}`)}for(let i in s)if(!e[i]){if(o&&i==="unknown")continue;delete s[i]}return s}var zo=ve(fl,mc),jo=ve(dl,mc);var hl={encode(e){if(!(e.length!==2||e[0]!==1||!W(e[1])||F.encode(e[1])!=="4e73"))return{type:"p2a",script:j.encode(e)}},decode:e=>{if(e.type==="p2a")return[1,F.decode("4e73")]}};function Lt(e,t){try{return Ge(e,t),!0}catch{return!1}}var pl={encode(e){if(!(e.length!==2||!W(e[0])||!Lt(e[0],pe.ecdsa)||e[1]!=="CHECKSIG"))return{type:"pk",pubkey:e[0]}},decode:e=>e.type==="pk"?[e.pubkey,"CHECKSIG"]:void 0},gl={encode(e){if(!(e.length!==5||e[0]!=="DUP"||e[1]!=="HASH160"||!W(e[2]))&&!(e[3]!=="EQUALVERIFY"||e[4]!=="CHECKSIG"))return{type:"pkh",hash:e[2]}},decode:e=>e.type==="pkh"?["DUP","HASH160",e.hash,"EQUALVERIFY","CHECKSIG"]:void 0},wl={encode(e){if(!(e.length!==3||e[0]!=="HASH160"||!W(e[1])||e[2]!=="EQUAL"))return{type:"sh",hash:e[1]}},decode:e=>e.type==="sh"?["HASH160",e.hash,"EQUAL"]:void 0},yl={encode(e){if(!(e.length!==2||e[0]!==0||!W(e[1]))&&e[1].length===32)return{type:"wsh",hash:e[1]}},decode:e=>e.type==="wsh"?[0,e.hash]:void 0},ml={encode(e){if(!(e.length!==2||e[0]!==0||!W(e[1]))&&e[1].length===20)return{type:"wpkh",hash:e[1]}},decode:e=>e.type==="wpkh"?[0,e.hash]:void 0},bl={encode(e){let t=e.length-1;if(e[t]!=="CHECKMULTISIG")return;let n=e[0],r=e[t-1];if(typeof n!="number"||typeof r!="number")return;let o=e.slice(1,-2);if(r===o.length){for(let s of o)if(!W(s))return;return{type:"ms",m:n,pubkeys:o}}},decode:e=>e.type==="ms"?[e.m,...e.pubkeys,e.pubkeys.length,"CHECKMULTISIG"]:void 0},xl={encode(e){if(!(e.length!==2||e[0]!==1||!W(e[1])))return{type:"tr",pubkey:e[1]}},decode:e=>e.type==="tr"?[1,e.pubkey]:void 0},El={encode(e){let t=e.length-1;if(e[t]!=="CHECKSIG")return;let n=[];for(let r=0;r<t;r++){let o=e[r];if(r&1){if(o!=="CHECKSIGVERIFY"||r===t-1)return;continue}if(!W(o))return;n.push(o)}return{type:"tr_ns",pubkeys:n}},decode:e=>{if(e.type!=="tr_ns")return;let t=[];for(let n=0;n<e.pubkeys.length-1;n++)t.push(e.pubkeys[n],"CHECKSIGVERIFY");return t.push(e.pubkeys[e.pubkeys.length-1],"CHECKSIG"),t}},vl={encode(e){let t=e.length-1;if(e[t]!=="NUMEQUAL"||e[1]!=="CHECKSIG")return;let n=[],r=ac(e[t-1]);if(typeof r=="number"){for(let o=0;o<t-1;o++){let s=e[o];if(o&1){if(s!==(o===1?"CHECKSIG":"CHECKSIGADD"))throw new Error("OutScript.encode/tr_ms: wrong element");continue}if(!W(s))throw new Error("OutScript.encode/tr_ms: wrong key element");n.push(s)}return{type:"tr_ms",pubkeys:n,m:r}}},decode:e=>{if(e.type!=="tr_ms")return;let t=[e.pubkeys[0],"CHECKSIG"];for(let n=1;n<e.pubkeys.length;n++)t.push(e.pubkeys[n],"CHECKSIGADD");return t.push(e.m,"NUMEQUAL"),t}},Sl={encode(e){return{type:"unknown",script:j.encode(e)}},decode:e=>e.type==="unknown"?j.decode(e.script):void 0},kl=[hl,pl,gl,wl,yl,ml,bl,xl,El,vl,Sl],Bl=Fe(j,wt.match(kl)),J=ve(Bl,e=>{if(e.type==="pk"&&!Lt(e.pubkey,pe.ecdsa))throw new Error("OutScript/pk: wrong key");if((e.type==="pkh"||e.type==="sh"||e.type==="wpkh")&&(!W(e.hash)||e.hash.length!==20))throw new Error(`OutScript/${e.type}: wrong hash`);if(e.type==="wsh"&&(!W(e.hash)||e.hash.length!==32))throw new Error("OutScript/wsh: wrong hash");if(e.type==="tr"&&(!W(e.pubkey)||!Lt(e.pubkey,pe.schnorr)))throw new Error("OutScript/tr: wrong taproot public key");if((e.type==="ms"||e.type==="tr_ns"||e.type==="tr_ms")&&!Array.isArray(e.pubkeys))throw new Error("OutScript/multisig: wrong pubkeys array");if(e.type==="ms"){let t=e.pubkeys.length;for(let n of e.pubkeys)if(!Lt(n,pe.ecdsa))throw new Error("OutScript/multisig: wrong pubkey");if(e.m<=0||t>16||e.m>t)throw new Error("OutScript/multisig: invalid params")}if(e.type==="tr_ns"||e.type==="tr_ms"){for(let t of e.pubkeys)if(!Lt(t,pe.schnorr))throw new Error(`OutScript/${e.type}: wrong pubkey`)}if(e.type==="tr_ms"){let t=e.pubkeys.length;if(e.m<=0||t>999||e.m>t)throw new Error("OutScript/tr_ms: invalid params")}return e});function xc(e,t){if(!ie(e.hash,q(t)))throw new Error("checkScript: wsh wrong witnessScript hash");let n=J.decode(t);if(n.type==="tr"||n.type==="tr_ns"||n.type==="tr_ms")throw new Error(`checkScript: P2${n.type} cannot be wrapped in P2SH`);if(n.type==="wpkh"||n.type==="sh")throw new Error(`checkScript: P2${n.type} cannot be wrapped in P2WSH`)}function Yt(e,t,n){if(e){let r=J.decode(e);if(r.type==="tr_ns"||r.type==="tr_ms"||r.type==="ms"||r.type=="pk")throw new Error(`checkScript: non-wrapped ${r.type}`);if(r.type==="sh"&&t){if(!ie(r.hash,Tt(t)))throw new Error("checkScript: sh wrong redeemScript hash");let o=J.decode(t);if(o.type==="tr"||o.type==="tr_ns"||o.type==="tr_ms")throw new Error(`checkScript: P2${o.type} cannot be wrapped in P2SH`);if(o.type==="sh")throw new Error("checkScript: P2SH cannot be wrapped in P2SH")}r.type==="wsh"&&n&&xc(r,n)}if(t){let r=J.decode(t);r.type==="wsh"&&n&&xc(r,n)}}var Fo=(e,t=_e)=>{if(!Lt(e,pe.ecdsa))throw new Error("P2PKH: invalid publicKey");let n=Tt(e);return{type:"pkh",script:J.encode({type:"pkh",hash:n}),address:Ze(t).encode({type:"pkh",hash:n}),hash:n}},Go=(e,t=_e)=>{let n=e.script;if(!W(n))throw new Error(`Wrong script: ${typeof e.script}, expected Uint8Array`);let r=Tt(n),o=J.encode({type:"sh",hash:r});return Yt(o,n,e.witnessScript),e.witnessScript?{type:"sh",redeemScript:n,script:J.encode({type:"sh",hash:r}),address:Ze(t).encode({type:"sh",hash:r}),hash:r,witnessScript:e.witnessScript}:{type:"sh",redeemScript:n,script:J.encode({type:"sh",hash:r}),address:Ze(t).encode({type:"sh",hash:r}),hash:r}};var kn=(e,t=_e)=>{if(!Lt(e,pe.ecdsa))throw new Error("P2WPKH: invalid publicKey");if(e.length===65)throw new Error("P2WPKH: uncompressed public key");let n=Tt(e);return{type:"wpkh",script:J.encode({type:"wpkh",hash:n}),address:Ze(t).encode({type:"wpkh",hash:n}),hash:n}};var Al=192,Ft=(e,t=Al)=>ur("TapLeaf",new Uint8Array([t]),ge.encode(e));var vc=Vn(q);function Sc(e,t){if(t.length<2||t.length>40)throw new Error("Witness: invalid length");if(e>16)throw new Error("Witness: invalid version");if(e===0&&!(t.length===20||t.length===32))throw new Error("Witness: invalid length for version")}function Yo(e,t,n=_e){Sc(e,t);let r=e===0?qn:no;return r.encode(n.bech32,[e].concat(r.toWords(t)))}function Ec(e,t){return vc.encode(st(Uint8Array.from(t),e))}function Ze(e=_e){return{encode(t){let{type:n}=t;if(n==="wpkh")return Yo(0,t.hash,e);if(n==="wsh")return Yo(0,t.hash,e);if(n==="tr")return Yo(1,t.pubkey,e);if(n==="pkh")return Ec(t.hash,[e.pubKeyHash]);if(n==="sh")return Ec(t.hash,[e.scriptHash]);throw new Error(`Unknown address type=${n}`)},decode(t){if(t.length<14||t.length>74)throw new Error("Invalid address length");if(e.bech32&&t.toLowerCase().startsWith(`${e.bech32}1`)){let r;try{if(r=qn.decode(t),r.words[0]!==0)throw new Error(`bech32: wrong version=${r.words[0]}`)}catch{if(r=no.decode(t),r.words[0]===0)throw new Error(`bech32m: wrong version=${r.words[0]}`)}if(r.prefix!==e.bech32)throw new Error(`wrong bech32 prefix=${r.prefix}`);let[o,...s]=r.words,i=qn.fromWords(s);if(Sc(o,i),o===0&&i.length===32)return{type:"wsh",hash:i};if(o===0&&i.length===20)return{type:"wpkh",hash:i};if(o===1&&i.length===32)return{type:"tr",pubkey:i};throw new Error("Unknown witness program")}let n=vc.decode(t);if(n.length!==21)throw new Error("Invalid base58 address");if(n[0]===e.pubKeyHash)return{type:"pkh",hash:n.slice(1)};if(n[0]===e.scriptHash)return{type:"sh",hash:n.slice(1)};throw new Error(`Invalid address prefix=${n[0]}`)}}}var br=new Uint8Array(32),Tl={amount:0xffffffffffffffffn,script:z},Sr=e=>Math.ceil(e/4),Pl=8,Il=2,$t=0,Ac=4294967295,Bd=wt.decimal(Pl),Bn=(e,t)=>e===void 0?t:e;function xr(e){if(Array.isArray(e))return e.map(t=>xr(t));if(W(e))return Uint8Array.from(e);if(["number","bigint","boolean","string","undefined"].includes(typeof e))return e;if(e===null)return e;if(typeof e=="object")return Object.fromEntries(Object.entries(e).map(([t,n])=>[t,xr(n)]));throw new Error(`cloneDeep: unknown type=${e} (${typeof e})`)}var K={DEFAULT:0,ALL:1,NONE:2,SINGLE:3,ANYONECANPAY:128},Ul={DEFAULT:K.DEFAULT,ALL:K.ALL,NONE:K.NONE,SINGLE:K.SINGLE,DEFAULT_ANYONECANPAY:K.DEFAULT|K.ANYONECANPAY,ALL_ANYONECANPAY:K.ALL|K.ANYONECANPAY,NONE_ANYONECANPAY:K.NONE|K.ANYONECANPAY,SINGLE_ANYONECANPAY:K.SINGLE|K.ANYONECANPAY},Ll=fr(Ul);function $l(e,t,n,r=z){return ie(n,t)&&(e=oc(e,r),t=lr(e)),{privKey:e,pubKey:t}}function Ot(e){if(e.script===void 0||e.amount===void 0)throw new Error("Transaction/output: script and amount required");return{script:e.script,amount:e.amount}}function Ct(e){if(e.txid===void 0||e.index===void 0)throw new Error("Transaction/input: txid and index required");return{txid:e.txid,index:e.index,sequence:Bn(e.sequence,Ac),finalScriptSig:Bn(e.finalScriptSig,z)}}function Zo(e){for(let t in e){let n=t;pc.includes(n)||delete e[n]}}var Xo=le({txid:X(32,!0),index:V});function Ol(e){if(typeof e!="number"||typeof Ll[e]!="string")throw new Error(`Invalid SigHash=${e}`);return e}function kc(e){let t=e&31;return{isAny:!!(e&K.ANYONECANPAY),isNone:t===K.NONE,isSingle:t===K.SINGLE}}function Cl(e){if(e!==void 0&&{}.toString.call(e)!=="[object Object]")throw new Error(`Wrong object type for transaction options: ${e}`);let t={...e,version:Bn(e.version,Il),lockTime:Bn(e.lockTime,0),PSBTVersion:Bn(e.PSBTVersion,0)};if(typeof t.allowUnknowInput<"u"&&(e.allowUnknownInputs=t.allowUnknowInput),typeof t.allowUnknowOutput<"u"&&(e.allowUnknownOutputs=t.allowUnknowOutput),typeof t.lockTime!="number")throw new Error("Transaction lock time should be number");if(V.encode(t.lockTime),t.PSBTVersion!==0&&t.PSBTVersion!==2)throw new Error(`Unknown PSBT version ${t.PSBTVersion}`);for(let n of["allowUnknownVersion","allowUnknownOutputs","allowUnknownInputs","disableScriptCheck","bip174jsCompat","allowLegacyWitnessUtxo","lowR"]){let r=t[n];if(r!==void 0&&typeof r!="boolean")throw new Error(`Transation options wrong type: ${n}=${r} (${typeof r})`)}if(t.allowUnknownVersion?typeof t.version=="number":![-1,0,1,2,3].includes(t.version))throw new Error(`Unknown version: ${t.version}`);if(t.customScripts!==void 0){let n=t.customScripts;if(!Array.isArray(n))throw new Error(`wrong custom scripts type (expected array): customScripts=${n} (${typeof n})`);for(let r of n){if(typeof r.encode!="function"||typeof r.decode!="function")throw new Error(`wrong script=${r} (${typeof r})`);if(r.finalizeTaproot!==void 0&&typeof r.finalizeTaproot!="function")throw new Error(`wrong script=${r} (${typeof r})`)}}return Object.freeze(t)}function Bc(e){if(e.nonWitnessUtxo&&e.index!==void 0){let t=e.nonWitnessUtxo.outputs.length-1;if(e.index>t)throw new Error(`validateInput: index(${e.index}) not in nonWitnessUtxo`);let n=e.nonWitnessUtxo.outputs[e.index];if(e.witnessUtxo&&(!ie(e.witnessUtxo.script,n.script)||e.witnessUtxo.amount!==n.amount))throw new Error("validateInput: witnessUtxo different from nonWitnessUtxo");if(e.txid){if(e.nonWitnessUtxo.outputs.length-1<e.index)throw new Error("nonWitnessUtxo: incorect output index");let o=An.fromRaw(mt.encode(e.nonWitnessUtxo),{allowUnknownOutputs:!0,disableScriptCheck:!0,allowUnknownInputs:!0}),s=F.encode(e.txid);if(o.isFinal&&o.id!==s)throw new Error(`nonWitnessUtxo: wrong txid, exp=${s} got=${o.id}`)}}return e}function Gt(e){if(e.nonWitnessUtxo){if(e.index===void 0)throw new Error("Unknown input index");return e.nonWitnessUtxo.outputs[e.index]}else{if(e.witnessUtxo)return e.witnessUtxo;throw new Error("Cannot find previous output info")}}function Er(e,t,n,r=!1,o=!1){let{nonWitnessUtxo:s,txid:i}=e;typeof s=="string"&&(s=F.decode(s)),W(s)&&(s=mt.decode(s)),!("nonWitnessUtxo"in e)&&s===void 0&&(s=t?.nonWitnessUtxo),typeof i=="string"&&(i=F.decode(i)),i===void 0&&(i=t?.txid);let c={...t,...e,nonWitnessUtxo:s,txid:i};!("nonWitnessUtxo"in e)&&c.nonWitnessUtxo===void 0&&delete c.nonWitnessUtxo,c.sequence===void 0&&(c.sequence=Ac),c.tapMerkleRoot===null&&delete c.tapMerkleRoot,c=mr(vn,c,t,n,o),wr.encode(c);let a;return c.nonWitnessUtxo&&c.index!==void 0?a=c.nonWitnessUtxo.outputs[c.index]:c.witnessUtxo&&(a=c.witnessUtxo),a&&!r&&Yt(a&&a.script,c.redeemScript,c.witnessScript),c}function vr(e,t=!1){let n="legacy",r=K.ALL,o=Gt(e),s=J.decode(o.script),i=s.type,c=s,a=[s];if(s.type==="tr")return r=K.DEFAULT,{txType:"taproot",type:"tr",last:s,lastScript:o.script,defaultSighash:r,sighash:e.sighashType||r};{if((s.type==="wpkh"||s.type==="wsh")&&(n="segwit"),s.type==="sh"){if(!e.redeemScript)throw new Error("inputType: sh without redeemScript");let d=J.decode(e.redeemScript);(d.type==="wpkh"||d.type==="wsh")&&(n="segwit"),a.push(d),c=d,i+=`-${d.type}`}if(c.type==="wsh"){if(!e.witnessScript)throw new Error("inputType: wsh without witnessScript");let d=J.decode(e.witnessScript);d.type==="wsh"&&(n="segwit"),a.push(d),c=d,i+=`-${d.type}`}let l=a[a.length-1];if(l.type==="sh"||l.type==="wsh")throw new Error("inputType: sh/wsh cannot be terminal type");let u=J.encode(l),f={type:i,txType:n,last:l,lastScript:u,defaultSighash:r,sighash:e.sighashType||r};if(n==="legacy"&&!t&&!e.nonWitnessUtxo)throw new Error("Transaction/sign: legacy input without nonWitnessUtxo, can result in attack that forces paying higher fees. Pass allowLegacyWitnessUtxo=true, if you sure");return f}}var An=class e{constructor(t={}){y(this,"global",{});y(this,"inputs",[]);y(this,"outputs",[]);y(this,"opts");let n=this.opts=Cl(t);n.lockTime!==$t&&(this.global.fallbackLocktime=n.lockTime),this.global.txVersion=n.version}static fromRaw(t,n={}){let r=mt.decode(t),o=new e({...n,version:r.version,lockTime:r.lockTime});for(let s of r.outputs)o.addOutput(s);if(o.outputs=r.outputs,o.inputs=r.inputs,r.witnesses)for(let s=0;s<r.witnesses.length;s++)o.inputs[s].finalScriptWitness=r.witnesses[s];return o}static fromPSBT(t,n={}){let r;try{r=zo.decode(t)}catch(f){try{r=jo.decode(t)}catch{throw f}}let o=r.global.version||0;if(o!==0&&o!==2)throw new Error(`Wrong PSBT version=${o}`);let s=r.global.unsignedTx,i=o===0?s?.version:r.global.txVersion,c=o===0?s?.lockTime:r.global.fallbackLocktime,a=new e({...n,version:i,lockTime:c,PSBTVersion:o}),l=o===0?s?.inputs.length:r.global.inputCount;a.inputs=r.inputs.slice(0,l).map((f,d)=>Bc({finalScriptSig:z,...r.global.unsignedTx?.inputs[d],...f}));let u=o===0?s?.outputs.length:r.global.outputCount;return a.outputs=r.outputs.slice(0,u).map((f,d)=>({...f,...r.global.unsignedTx?.outputs[d]})),a.global={...r.global,txVersion:i},c!==$t&&(a.global.fallbackLocktime=c),a}toPSBT(t=this.opts.PSBTVersion){if(t!==0&&t!==2)throw new Error(`Wrong PSBT version=${t}`);let n=this.inputs.map(s=>Bc(qo(t,vn,s)));for(let s of n)s.partialSig&&!s.partialSig.length&&delete s.partialSig,s.finalScriptSig&&!s.finalScriptSig.length&&delete s.finalScriptSig,s.finalScriptWitness&&!s.finalScriptWitness.length&&delete s.finalScriptWitness;let r=this.outputs.map(s=>qo(t,Sn,s)),o={...this.global};return t===0?(o.unsignedTx=Ut.decode(Ut.encode({version:this.version,lockTime:this.lockTime,inputs:this.inputs.map(Ct).map(s=>({...s,finalScriptSig:z})),outputs:this.outputs.map(Ot)})),delete o.fallbackLocktime,delete o.txVersion):(o.version=t,o.txVersion=this.version,o.inputCount=this.inputs.length,o.outputCount=this.outputs.length,o.fallbackLocktime&&o.fallbackLocktime===$t&&delete o.fallbackLocktime),this.opts.bip174jsCompat&&(n.length||n.push({}),r.length||r.push({})),(t===0?zo:jo).encode({global:o,inputs:n,outputs:r})}get lockTime(){let t=$t,n=0,r=$t,o=0;for(let s of this.inputs)s.requiredHeightLocktime&&(t=Math.max(t,s.requiredHeightLocktime),n++),s.requiredTimeLocktime&&(r=Math.max(r,s.requiredTimeLocktime),o++);return n&&n>=o?t:r!==$t?r:this.global.fallbackLocktime||$t}get version(){if(this.global.txVersion===void 0)throw new Error("No global.txVersion");return this.global.txVersion}inputStatus(t){this.checkInputIdx(t);let n=this.inputs[t];return n.finalScriptSig&&n.finalScriptSig.length||n.finalScriptWitness&&n.finalScriptWitness.length?"finalized":n.tapKeySig||n.tapScriptSig&&n.tapScriptSig.length||n.partialSig&&n.partialSig.length?"signed":"unsigned"}inputSighash(t){this.checkInputIdx(t);let n=this.inputs[t].sighashType,r=n===void 0?K.DEFAULT:n,o=r===K.DEFAULT?K.ALL:r&3;return{sigInputs:r&K.ANYONECANPAY,sigOutputs:o}}signStatus(){let t=!0,n=!0,r=[],o=[];for(let s=0;s<this.inputs.length;s++){if(this.inputStatus(s)==="unsigned")continue;let{sigInputs:c,sigOutputs:a}=this.inputSighash(s);if(c===K.ANYONECANPAY?r.push(s):t=!1,a===K.ALL)n=!1;else if(a===K.SINGLE)o.push(s);else if(a!==K.NONE)throw new Error(`Wrong signature hash output type: ${a}`)}return{addInput:t,addOutput:n,inputs:r,outputs:o}}get isFinal(){for(let t=0;t<this.inputs.length;t++)if(this.inputStatus(t)!=="finalized")return!1;return!0}get hasWitnesses(){let t=!1;for(let n of this.inputs)n.finalScriptWitness&&n.finalScriptWitness.length&&(t=!0);return t}get weight(){if(!this.isFinal)throw new Error("Transaction is not finalized");let t=32,n=this.outputs.map(Ot);t+=4*ue.encode(this.outputs.length).length;for(let r of n)t+=32+4*ge.encode(r.script).length;this.hasWitnesses&&(t+=2),t+=4*ue.encode(this.inputs.length).length;for(let r of this.inputs)t+=160+4*ge.encode(r.finalScriptSig||z).length,this.hasWitnesses&&r.finalScriptWitness&&(t+=It.encode(r.finalScriptWitness).length);return t}get vsize(){return Sr(this.weight)}toBytes(t=!1,n=!1){return mt.encode({version:this.version,lockTime:this.lockTime,inputs:this.inputs.map(Ct).map(r=>({...r,finalScriptSig:t&&r.finalScriptSig||z})),outputs:this.outputs.map(Ot),witnesses:this.inputs.map(r=>r.finalScriptWitness||[]),segwitFlag:n&&this.hasWitnesses})}get unsignedTx(){return this.toBytes(!1,!1)}get hex(){return F.encode(this.toBytes(!0,this.hasWitnesses))}get hash(){return F.encode(it(this.toBytes(!0)))}get id(){return F.encode(it(this.toBytes(!0)).reverse())}checkInputIdx(t){if(!Number.isSafeInteger(t)||0>t||t>=this.inputs.length)throw new Error(`Wrong input index=${t}`)}getInput(t){return this.checkInputIdx(t),xr(this.inputs[t])}get inputsLength(){return this.inputs.length}addInput(t,n=!1){if(!n&&!this.signStatus().addInput)throw new Error("Tx has signed inputs, cannot add new one");return this.inputs.push(Er(t,void 0,void 0,this.opts.disableScriptCheck)),this.inputs.length-1}updateInput(t,n,r=!1){this.checkInputIdx(t);let o;if(!r){let s=this.signStatus();(!s.addInput||s.inputs.includes(t))&&(o=gc)}this.inputs[t]=Er(n,this.inputs[t],o,this.opts.disableScriptCheck,this.opts.allowUnknown)}checkOutputIdx(t){if(!Number.isSafeInteger(t)||0>t||t>=this.outputs.length)throw new Error(`Wrong output index=${t}`)}getOutput(t){return this.checkOutputIdx(t),xr(this.outputs[t])}getOutputAddress(t,n=_e){let r=this.getOutput(t);if(r.script)return Ze(n).encode(J.decode(r.script))}get outputsLength(){return this.outputs.length}normalizeOutput(t,n,r){let{amount:o,script:s}=t;if(o===void 0&&(o=n?.amount),typeof o!="bigint")throw new Error(`Wrong amount type, should be of type bigint in sats, but got ${o} of type ${typeof o}`);typeof s=="string"&&(s=F.decode(s)),s===void 0&&(s=n?.script);let i={...n,...t,amount:o,script:s};if(i.amount===void 0&&delete i.amount,i=mr(Sn,i,n,r,this.opts.allowUnknown),yr.encode(i),i.script&&!this.opts.allowUnknownOutputs&&J.decode(i.script).type==="unknown")throw new Error("Transaction/output: unknown output script type, there is a chance that input is unspendable. Pass allowUnknownOutputs=true, if you sure");return this.opts.disableScriptCheck||Yt(i.script,i.redeemScript,i.witnessScript),i}addOutput(t,n=!1){if(!n&&!this.signStatus().addOutput)throw new Error("Tx has signed outputs, cannot add new one");return this.outputs.push(this.normalizeOutput(t)),this.outputs.length-1}updateOutput(t,n,r=!1){this.checkOutputIdx(t);let o;if(!r){let s=this.signStatus();(!s.addOutput||s.outputs.includes(t))&&(o=wc)}this.outputs[t]=this.normalizeOutput(n,this.outputs[t],o)}addOutputAddress(t,n,r=_e){return this.addOutput({script:J.encode(Ze(r).decode(t)),amount:n})}get fee(){let t=0n;for(let r of this.inputs){let o=Gt(r);if(!o)throw new Error("Empty input amount");t+=o.amount}let n=this.outputs.map(Ot);for(let r of n)t-=r.amount;return t}preimageLegacy(t,n,r){let{isAny:o,isNone:s,isSingle:i}=kc(r);if(t<0||!Number.isSafeInteger(t))throw new Error(`Invalid input idx=${t}`);if(i&&t>=this.outputs.length||t>=this.inputs.length)return Vi.encode(1n);n=j.encode(j.decode(n).filter(u=>u!=="CODESEPARATOR"));let c=this.inputs.map(Ct).map((u,f)=>({...u,finalScriptSig:f===t?n:z}));o?c=[c[t]]:(s||i)&&(c=c.map((u,f)=>({...u,sequence:f===t?u.sequence:0})));let a=this.outputs.map(Ot);s?a=[]:i&&(a=a.slice(0,t).fill(Tl).concat([a[t]]));let l=mt.encode({lockTime:this.lockTime,version:this.version,segwitFlag:!1,inputs:c,outputs:a});return it(l,yt.encode(r))}preimageWitnessV0(t,n,r,o){let{isAny:s,isNone:i,isSingle:c}=kc(r),a=br,l=br,u=br,f=this.inputs.map(Ct),d=this.outputs.map(Ot);s||(a=it(...f.map(Xo.encode))),!s&&!c&&!i&&(l=it(...f.map(p=>V.encode(p.sequence)))),!c&&!i?u=it(...d.map(ct.encode)):c&&t<d.length&&(u=it(ct.encode(d[t])));let h=f[t];return it(yt.encode(this.version),a,l,X(32,!0).encode(h.txid),V.encode(h.index),ge.encode(n),zt.encode(o),V.encode(h.sequence),u,V.encode(this.lockTime),V.encode(r))}preimageWitnessV1(t,n,r,o,s=-1,i,c=192,a){if(!Array.isArray(o)||this.inputs.length!==o.length)throw new Error(`Invalid amounts array=${o}`);if(!Array.isArray(n)||this.inputs.length!==n.length)throw new Error(`Invalid prevOutScript array=${n}`);let l=[Ve.encode(0),Ve.encode(r),yt.encode(this.version),V.encode(this.lockTime)],u=r===K.DEFAULT?K.ALL:r&3,f=r&K.ANYONECANPAY,d=this.inputs.map(Ct),h=this.outputs.map(Ot);f!==K.ANYONECANPAY&&l.push(...[d.map(Xo.encode),o.map(zt.encode),n.map(ge.encode),d.map(w=>V.encode(w.sequence))].map(w=>q(st(...w)))),u===K.ALL&&l.push(q(st(...h.map(ct.encode))));let p=(a?1:0)|(i?2:0);if(l.push(new Uint8Array([p])),f===K.ANYONECANPAY){let w=d[t];l.push(Xo.encode(w),zt.encode(o[t]),ge.encode(n[t]),V.encode(w.sequence))}else l.push(V.encode(t));return p&1&&l.push(q(ge.encode(a||z))),u===K.SINGLE&&l.push(t<h.length?q(ct.encode(h[t])):br),i&&l.push(Ft(i,c),Ve.encode(0),yt.encode(s)),ur("TapSighash",...l)}signIdx(t,n,r,o){this.checkInputIdx(n);let s=this.inputs[n],i=vr(s,this.opts.allowLegacyWitnessUtxo);if(!W(t)){if(!s.bip32Derivation||!s.bip32Derivation.length)throw new Error("bip32Derivation: empty");let u=s.bip32Derivation.filter(d=>d[1].fingerprint==t.fingerprint).map(([d,{path:h}])=>{let p=t;for(let w of h)p=p.deriveChild(w);if(!ie(p.publicKey,d))throw new Error("bip32Derivation: wrong pubKey");if(!p.privateKey)throw new Error("bip32Derivation: no privateKey");return p});if(!u.length)throw new Error(`bip32Derivation: no items with fingerprint=${t.fingerprint}`);let f=!1;for(let d of u)this.signIdx(d.privateKey,n)&&(f=!0);return f}r?r.forEach(Ol):r=[i.defaultSighash];let c=i.sighash;if(!r.includes(c))throw new Error(`Input with not allowed sigHash=${c}. Allowed: ${r.join(", ")}`);let{sigOutputs:a}=this.inputSighash(n);if(a===K.SINGLE&&n>=this.outputs.length)throw new Error(`Input with sighash SINGLE, but there is no output with corresponding index=${n}`);let l=Gt(s);if(i.txType==="taproot"){let u=this.inputs.map(Gt),f=u.map(m=>m.script),d=u.map(m=>m.amount),h=!1,p=lr(t),w=s.tapMerkleRoot||z;if(s.tapInternalKey){let{pubKey:m,privKey:E}=$l(t,p,s.tapInternalKey,w),[v,k]=Ho(s.tapInternalKey,w);if(ie(v,m)){let T=this.preimageWitnessV1(n,f,c,d),$=st(_o(T,E,o),c!==K.DEFAULT?new Uint8Array([c]):z);this.updateInput(n,{tapKeySig:$},!0),h=!0}}if(s.tapLeafScript){s.tapScriptSig=s.tapScriptSig||[];for(let[m,E]of s.tapLeafScript){let v=E.subarray(0,-1),k=j.decode(v),T=E[E.length-1],$=Ft(v,T);if(k.findIndex(M=>W(M)&&ie(M,p))===-1)continue;let te=this.preimageWitnessV1(n,f,c,d,void 0,v,T),G=st(_o(te,t,o),c!==K.DEFAULT?new Uint8Array([c]):z);this.updateInput(n,{tapScriptSig:[[{pubKey:p,leafHash:$},G]]},!0),h=!0}}if(!h)throw new Error("No taproot scripts signed");return!0}else{let u=No(t),f=!1,d=Tt(u);for(let w of j.decode(i.lastScript))W(w)&&(ie(w,u)||ie(w,d))&&(f=!0);if(!f)throw new Error(`Input script doesn't have pubKey: ${i.lastScript}`);let h;if(i.txType==="legacy")h=this.preimageLegacy(n,i.lastScript,c);else if(i.txType==="segwit"){let w=i.lastScript;i.last.type==="wpkh"&&(w=J.encode({type:"pkh",hash:i.last.hash})),h=this.preimageWitnessV0(n,w,c,l.amount)}else throw new Error(`Transaction/sign: unknown tx type: ${i.txType}`);let p=nc(h,t,this.opts.lowR);this.updateInput(n,{partialSig:[[u,st(p,new Uint8Array([c]))]]},!0)}return!0}sign(t,n,r){let o=0;for(let s=0;s<this.inputs.length;s++)try{this.signIdx(t,s,n,r)&&o++}catch{}if(!o)throw new Error("No inputs signed");return o}finalizeIdx(t){if(this.checkInputIdx(t),this.fee<0n)throw new Error("Outputs spends more than inputs amount");let n=this.inputs[t],r=vr(n,this.opts.allowLegacyWitnessUtxo);if(r.txType==="taproot"){if(n.tapKeySig)n.finalScriptWitness=[n.tapKeySig];else if(n.tapLeafScript&&n.tapScriptSig){let a=n.tapLeafScript.sort((l,u)=>bt.encode(l[0]).length-bt.encode(u[0]).length);for(let[l,u]of a){let f=u.slice(0,-1),d=u[u.length-1],h=J.decode(f),p=Ft(f,d),w=n.tapScriptSig.filter(E=>ie(E[0].leafHash,p)),m=[];if(h.type==="tr_ms"){let E=h.m,v=h.pubkeys,k=0;for(let T of v){let $=w.findIndex(O=>ie(O[0].pubKey,T));if(k===E||$===-1){m.push(z);continue}m.push(w[$][1]),k++}if(k!==E)continue}else if(h.type==="tr_ns"){for(let E of h.pubkeys){let v=w.findIndex(k=>ie(k[0].pubKey,E));v!==-1&&m.push(w[v][1])}if(m.length!==h.pubkeys.length)continue}else if(h.type==="unknown"&&this.opts.allowUnknownInputs){let E=j.decode(f);if(m=w.map(([{pubKey:v},k])=>{let T=E.findIndex($=>W($)&&ie($,v));if(T===-1)throw new Error("finalize/taproot: cannot find position of pubkey in script");return{signature:k,pos:T}}).sort((v,k)=>v.pos-k.pos).map(v=>v.signature),!m.length)continue}else{let E=this.opts.customScripts;if(E)for(let v of E){if(!v.finalizeTaproot)continue;let k=j.decode(f),T=v.encode(k);if(T===void 0)continue;let $=v.finalizeTaproot(f,T,w);if($){n.finalScriptWitness=$.concat(bt.encode(l)),n.finalScriptSig=z,Zo(n);return}}throw new Error("Finalize: Unknown tapLeafScript")}n.finalScriptWitness=m.reverse().concat([f,bt.encode(l)]);break}if(!n.finalScriptWitness)throw new Error("finalize/taproot: empty witness")}else throw new Error("finalize/taproot: unknown input");n.finalScriptSig=z,Zo(n);return}if(!n.partialSig||!n.partialSig.length)throw new Error("Not enough partial sign");let o=z,s=[];if(r.last.type==="ms"){let a=r.last.m,l=r.last.pubkeys,u=[];for(let f of l){let d=n.partialSig.find(h=>ie(f,h[0]));d&&u.push(d[1])}if(u=u.slice(0,a),u.length!==a)throw new Error(`Multisig: wrong signatures count, m=${a} n=${l.length} signatures=${u.length}`);o=j.encode([0,...u])}else if(r.last.type==="pk")o=j.encode([n.partialSig[0][1]]);else if(r.last.type==="pkh")o=j.encode([n.partialSig[0][1],n.partialSig[0][0]]);else if(r.last.type==="wpkh")o=z,s=[n.partialSig[0][1],n.partialSig[0][0]];else if(r.last.type==="unknown"&&!this.opts.allowUnknownInputs)throw new Error("Unknown inputs not allowed");let i,c;if(r.type.includes("wsh-")&&(o.length&&r.lastScript.length&&(s=j.decode(o).map(a=>{if(a===0)return z;if(W(a))return a;throw new Error(`Wrong witness op=${a}`)})),s=s.concat(r.lastScript)),r.txType==="segwit"&&(c=s),r.type.startsWith("sh-wsh-")?i=j.encode([j.encode([0,q(r.lastScript)])]):r.type.startsWith("sh-")?i=j.encode([...j.decode(o),r.lastScript]):r.type.startsWith("wsh-")||r.txType!=="segwit"&&(i=o),!i&&!c)throw new Error("Unknown error finalizing input");i&&(n.finalScriptSig=i),c&&(n.finalScriptWitness=c),Zo(n)}finalize(){for(let t=0;t<this.inputs.length;t++)this.finalizeIdx(t)}extract(){if(!this.isFinal)throw new Error("Transaction has unfinalized inputs");if(!this.outputs.length)throw new Error("Transaction has no outputs");if(this.fee<0n)throw new Error("Outputs spends more than inputs amount");return this.toBytes(!0,!0)}combine(t){for(let o of["PSBTVersion","version","lockTime"])if(this.opts[o]!==t.opts[o])throw new Error(`Transaction/combine: different ${o} this=${this.opts[o]} other=${t.opts[o]}`);for(let o of["inputs","outputs"])if(this[o].length!==t[o].length)throw new Error(`Transaction/combine: different ${o} length this=${this[o].length} other=${t[o].length}`);let n=this.global.unsignedTx?Ut.encode(this.global.unsignedTx):z,r=t.global.unsignedTx?Ut.encode(t.global.unsignedTx):z;if(!ie(n,r))throw new Error("Transaction/combine: different unsigned tx");this.global=mr(gr,this.global,t.global,void 0,this.opts.allowUnknown);for(let o=0;o<this.inputs.length;o++)this.updateInput(o,t.inputs[o],!0);for(let o=0;o<this.outputs.length;o++)this.updateOutput(o,t.outputs[o],!0);return this}clone(){return e.fromPSBT(this.toPSBT(this.opts.PSBTVersion),this.opts)}};var kr=e=>bt.encode(e);function Rl(e,t,n){if(!e||!e.length)throw new Error("no leafs");let r=()=>new Uint8Array(t),o=e.sort((s,i)=>kr(s[0]).length-kr(i[0]).length);for(let[s,i]of o){let c=i.slice(0,-1),a=i[i.length-1],l=J.decode(c),u=[];if(l.type==="tr_ms"){let f=l.m,d=l.pubkeys.length-f;for(let h=0;h<f;h++)u.push(r());for(let h=0;h<d;h++)u.push(z)}else if(l.type==="tr_ns")for(let f of l.pubkeys)u.push(r());else{if(!n)throw new Error("Finalize: Unknown tapLeafScript");let f=Ft(c,a);for(let d of n){if(!d.finalizeTaproot)continue;let h=j.decode(c),p=d.encode(h);if(p===void 0)continue;let w=h.filter(E=>{if(!W(E))return!1;try{return Ge(E,pe.schnorr),!0}catch{return!1}}),m=d.finalizeTaproot(c,p,w.map(E=>[{pubKey:E,leafHash:f},r()]));if(m)return m.concat(kr(s))}}return u.reverse().concat([c,kr(s)])}throw new Error("there was no witness")}function Nl(e,t,n){let r=z,o;if(e.txType==="taproot"){let c=e.sighash!==K.DEFAULT?65:64;if(t.tapInternalKey&&!ie(t.tapInternalKey,Ko))o=[new Uint8Array(c)];else if(t.tapLeafScript)o=Rl(t.tapLeafScript,c,n.customScripts);else throw new Error("estimateInput/taproot: unknown input")}else{let c=()=>new Uint8Array(72),a=()=>new Uint8Array(33),l=z,u=[],f=e.last.type;if(f==="ms"){let d=e.last.m,h=[0];for(let p=0;p<d;p++)h.push(c());l=j.encode(h)}else if(f==="pk")l=j.encode([c()]);else if(f==="pkh")l=j.encode([c(),a()]);else if(f==="wpkh")l=z,u=[c(),a()];else if(f==="unknown"&&!n.allowUnknownInputs)throw new Error("Unknown inputs are not allowed");e.type.includes("wsh-")&&(l.length&&e.lastScript.length&&(u=j.decode(l).map(d=>{if(d===0)return z;if(W(d))return d;throw new Error(`Wrong witness op=${d}`)})),u=u.concat(e.lastScript)),e.txType==="segwit"&&(o=u),e.type.startsWith("sh-wsh-")?r=j.encode([j.encode([0,new Uint8Array(q.outputLen)])]):e.type.startsWith("sh-")?r=j.encode([...j.decode(l),e.lastScript]):e.type.startsWith("wsh-")||e.txType!=="segwit"&&(r=l)}let s=160+4*ge.encode(r).length,i=!1;return o&&(s+=It.encode(o).length,i=!0),{weight:s,hasWitnesses:i}}var Tc=(e,t)=>{let n=e-t;return n<0n?-1:n>0n?1:0};function Qo(e,t={},n=_e){let r;if("script"in e&&W(e.script)&&(r=e.script),"address"in e){if(typeof e.address!="string")throw new Error(`Estimator: wrong output address=${e.address}`);r=J.encode(Ze(n).decode(e.address))}if(!r)throw new Error("Estimator: wrong output script");if(typeof e.amount!="bigint")throw new Error(`Estimator: wrong output amount=${e.amount}, should be of type bigint but got ${typeof e.amount}.`);if(r&&!t.allowUnknownOutputs&&J.decode(r).type==="unknown")throw new Error("Estimator: unknown output script type, there is a chance that input is unspendable. Pass allowUnknownOutputs=true, if you sure");return t.disableScriptCheck||Yt(r),r}var Jo=class{constructor(t,n,r){y(this,"baseWeight");y(this,"changeWeight");y(this,"amount");y(this,"requiredIndices",[]);y(this,"normalizedInputs");y(this,"dust");y(this,"outputs");y(this,"opts");if(this.outputs=n,this.opts=r,typeof r.feePerByte!="bigint")throw new Error(`Estimator: wrong feePerByte=${r.feePerByte}, should be of type bigint but got ${typeof r.feePerByte}.`);let i=r.dust===void 0?BigInt(148+34):r.dust;if(typeof i!="bigint")throw new Error(`Estimator: wrong dust=${r.dust}, should be of type bigint but got ${typeof r.dust}.`);let c=r.dustRelayFeeRate===void 0?3n:r.dustRelayFeeRate;if(typeof c!="bigint")throw new Error(`Estimator: wrong dustRelayFeeRate=${r.dustRelayFeeRate}, should be of type bigint but got ${typeof r.dustRelayFeeRate}.`);if(this.dust=i*c,r.requiredInputs!==void 0&&!Array.isArray(r.requiredInputs))throw new Error(`Estimator: wrong required inputs=${r.requiredInputs}`);let a=r.network||_e,l=0n,u=32;for(let p of n){let w=Qo(p,r,r.network);u+=32+4*ge.encode(w).length,l+=p.amount}if(typeof r.changeAddress!="string")throw new Error(`Estimator: wrong change address=${r.changeAddress}`);let f=u+32+4*ge.encode(J.encode(Ze(a).decode(r.changeAddress))).length;u+=4*ue.encode(n.length).length,f+=4*ue.encode(n.length+1).length,this.baseWeight=u,this.changeWeight=f,this.amount=l;let d=Array.from(t);if(r.requiredInputs)for(let p=0;p<r.requiredInputs.length;p++)this.requiredIndices.push(d.push(r.requiredInputs[p])-1);let h=new Set;this.normalizedInputs=d.map(p=>{let w=Er(p,void 0,void 0,r.disableScriptCheck,r.allowUnknown);Ct(w);let m=`${F.encode(w.txid)}:${w.index}`;if(!r.allowSameUtxo&&h.has(m))throw new Error(`Estimator: same input passed multiple times: ${m}`);h.add(m);let E=vr(w,r.allowLegacyWitnessUtxo),v=Gt(w),k=Nl(E,w,this.opts),T=v.amount-r.feePerByte*BigInt(Sr(k.weight));return{inputType:E,normalized:w,amount:v.amount,value:T,estimate:k}})}checkInputIdx(t){if(!Number.isSafeInteger(t)||0>t||t>=this.normalizedInputs.length)throw new Error(`Wrong input index=${t}`);return t}sortIndices(t){return t.slice().sort((n,r)=>{let o=this.normalizedInputs[this.checkInputIdx(n)],s=this.normalizedInputs[this.checkInputIdx(r)],i=Pt(o.normalized.txid,s.normalized.txid);return i!==0?i:o.normalized.index-s.normalized.index})}sortOutputs(t){let n=t.map(o=>Qo(o,this.opts,this.opts.network));return t.map((o,s)=>s).sort((o,s)=>{let i=t[o].amount,c=t[s].amount,a=Tc(i,c);return a!==0?a:Pt(n[o],n[s])})}getSatoshi(t){return this.opts.feePerByte*BigInt(Sr(t))}get biggest(){return this.normalizedInputs.map((t,n)=>n).sort((t,n)=>Tc(this.normalizedInputs[n].value,this.normalizedInputs[t].value))}get smallest(){return this.biggest.reverse()}get oldest(){return this.normalizedInputs.map((t,n)=>n)}get newest(){return this.oldest.reverse()}accumulate(t,n=!1,r=!0,o=!1){let s=this.opts.alwaysChange?this.changeWeight:this.baseWeight,i=!1,c=0,a=0n,l=this.amount,u=new Set,f;for(let d of this.requiredIndices){if(this.checkInputIdx(d),u.has(d))throw new Error("required input encountered multiple times");let{estimate:h,amount:p}=this.normalizedInputs[d],w=s+h.weight;!i&&h.hasWitnesses&&(w+=2);let m=w+4*ue.encode(c).length;if(f=this.getSatoshi(m),s=w,h.hasWitnesses&&(i=!0),c++,a+=p,u.add(d),!o&&l+f<=a&&c>=this.requiredIndices.length)return{indices:Array.from(u),fee:f,weight:m,total:a}}for(let d of t){if(this.checkInputIdx(d),u.has(d))continue;let{estimate:h,amount:p,value:w}=this.normalizedInputs[d],m=s+h.weight;!i&&h.hasWitnesses&&(m+=2);let E=m+4*ue.encode(c).length;if(f=this.getSatoshi(E),!(n&&p+a>l+f+this.dust)&&!(r&&w<=0n)&&(s=m,h.hasWitnesses&&(i=!0),c++,a+=p,u.add(d),!o&&l+f<=a))return{indices:Array.from(u),fee:f,weight:E,total:a}}if(o){let d=s+4*ue.encode(c).length;return{indices:Array.from(u),fee:f,weight:d,total:a}}}default(){let{biggest:t}=this,n=this.accumulate(t,!0,!1);return n||this.accumulate(t)}select(t){if(t==="all")return this.accumulate(this.normalizedInputs.map((r,o)=>o),!1,!0,!0);if(t==="default")return this.default();let n={Oldest:()=>this.oldest,Newest:()=>this.newest,Smallest:()=>this.smallest,Biggest:()=>this.biggest};if(t.startsWith("exact")){let[r,o]=t.slice(5).split("/");if(!n[r])throw new Error(`Estimator.select: wrong strategy=${t}`);t=o;let s=this.accumulate(n[r](),!0,!0);if(s)return s}if(t.startsWith("accum")){let r=t.slice(5);if(!n[r])throw new Error(`Estimator.select: wrong strategy=${t}`);return this.accumulate(n[r]())}throw new Error(`Estimator.select: wrong strategy=${t}`)}result(t){let n=this.select(t);if(!n)return;let{indices:r,weight:o,total:s}=n,i=this.opts.alwaysChange,c=this.opts.alwaysChange?o:o+(this.changeWeight-this.baseWeight),a=this.getSatoshi(c),l=n.fee,u=s-this.amount-a;u>this.dust&&(i=!0);let f=r,d=Array.from(this.outputs);if(i){if(l=a,u<0n)throw new Error(`Estimator.result: negative change=${u}`);d.push({address:this.opts.changeAddress,amount:u})}this.opts.bip69&&(f=this.sortIndices(f),d=this.sortOutputs(d).map(w=>d[w]));let h={inputs:f.map(w=>this.normalizedInputs[w].normalized),outputs:d,fee:l,weight:this.opts.alwaysChange?n.weight:c,change:!!i},p;if(this.opts.createTx){let{inputs:w,outputs:m}=h;p=new An(this.opts);for(let E of w)p.addInput(E);for(let E of m)p.addOutput({...E,script:Qo(E,this.opts,this.opts.network)})}return Object.assign(h,{tx:p})}};function es(e,t,n,r){let o={createTx:!0,bip69:!0,...r};return new Jo(e,t,o).result(n)}function Pc(e,t,n,r,o,s){let i=e[t++]^n[r++],c=e[t++]^n[r++],a=e[t++]^n[r++],l=e[t++]^n[r++],u=e[t++]^n[r++],f=e[t++]^n[r++],d=e[t++]^n[r++],h=e[t++]^n[r++],p=e[t++]^n[r++],w=e[t++]^n[r++],m=e[t++]^n[r++],E=e[t++]^n[r++],v=e[t++]^n[r++],k=e[t++]^n[r++],T=e[t++]^n[r++],$=e[t++]^n[r++],O=i,te=c,G=a,M=l,we=u,ce=f,N=d,R=h,x=p,b=w,S=m,A=E,I=v,P=k,U=T,B=$;for(let L=0;L<8;L+=2)we^=_(O+I|0,7),x^=_(we+O|0,9),I^=_(x+we|0,13),O^=_(I+x|0,18),b^=_(ce+te|0,7),P^=_(b+ce|0,9),te^=_(P+b|0,13),ce^=_(te+P|0,18),U^=_(S+N|0,7),G^=_(U+S|0,9),N^=_(G+U|0,13),S^=_(N+G|0,18),M^=_(B+A|0,7),R^=_(M+B|0,9),A^=_(R+M|0,13),B^=_(A+R|0,18),te^=_(O+M|0,7),G^=_(te+O|0,9),M^=_(G+te|0,13),O^=_(M+G|0,18),N^=_(ce+we|0,7),R^=_(N+ce|0,9),we^=_(R+N|0,13),ce^=_(we+R|0,18),A^=_(S+b|0,7),x^=_(A+S|0,9),b^=_(x+A|0,13),S^=_(b+x|0,18),I^=_(B+U|0,7),P^=_(I+B|0,9),U^=_(P+I|0,13),B^=_(U+P|0,18);o[s++]=i+O|0,o[s++]=c+te|0,o[s++]=a+G|0,o[s++]=l+M|0,o[s++]=u+we|0,o[s++]=f+ce|0,o[s++]=d+N|0,o[s++]=h+R|0,o[s++]=p+x|0,o[s++]=w+b|0,o[s++]=m+S|0,o[s++]=E+A|0,o[s++]=v+I|0,o[s++]=k+P|0,o[s++]=T+U|0,o[s++]=$+B|0}function ts(e,t,n,r,o){let s=r+0,i=r+16*o;for(let c=0;c<16;c++)n[i+c]=e[t+(2*o-1)*16+c];for(let c=0;c<o;c++,s+=16,t+=16)Pc(n,i,e,t,n,s),c>0&&(i+=16),Pc(n,s,e,t+=16,n,i)}function Hl(e,t,n){let r=On({dkLen:32,asyncTick:10,maxmem:1073742848},n),{N:o,r:s,p:i,dkLen:c,asyncTick:a,maxmem:l,onProgress:u}=r;if(re(o,"N"),re(s,"r"),re(i,"p"),re(c,"dkLen"),re(a,"asyncTick"),re(l,"maxmem"),u!==void 0&&typeof u!="function")throw new Error("progressCb must be a function");let f=128*s,d=f/4,h=Math.pow(2,32);if(o<=1||(o&o-1)!==0||o>h)throw new Error('"N" expected a power of 2, and 2^1 <= N <= 2^32');if(i<1||i>(h-1)*32/f)throw new Error('"p" expected integer 1..((2^32 - 1) * 32) / (128 * r)');if(c<1||c>(h-1)*32)throw new Error('"dkLen" expected integer 1..(2^32 - 1) * 32');if(f*(o+i)>l)throw new Error('"maxmem" limit was hit, expected 128*r*(N+p) <= "maxmem"='+l);let w=tn(q,e,t,{c:1,dkLen:f*i}),m=Ln(w),E=Ln(new Uint8Array(f*o)),v=Ln(new Uint8Array(f)),k=()=>{};if(u){let T=2*o*i,$=Math.max(Math.floor(T/1e4),1),O=0;k=()=>{O++,u&&(!(O%$)||O===T)&&u(O/T)}}return{N:o,r:s,p:i,dkLen:c,blockSize32:d,V:E,B32:m,B:w,tmp:v,blockMixCb:k,asyncTick:a}}function Kl(e,t,n,r,o){let s=tn(q,e,n,{c:1,dkLen:t});return xe(n,r,o),s}async function ns(e,t,n){let{N:r,r:o,p:s,dkLen:i,blockSize32:c,V:a,B32:l,B:u,tmp:f,blockMixCb:d,asyncTick:h}=Hl(e,t,n);Dr(l);for(let p=0;p<s;p++){let w=c*p;for(let E=0;E<c;E++)a[E]=l[w+E];let m=0;await $n(r-1,h,()=>{ts(a,m,a,m+=c,o),d()}),ts(a,(r-1)*c,l,w,o),d(),await $n(r,h,()=>{let E=(l[w+c-16]&r-1)>>>0;for(let v=0;v<c;v++)f[v]=l[w+v]^a[E*c+v];ts(f,0,l,w,o),d()})}return Dr(l),Kl(e,i,u,a,f)}function Dl(e){return e instanceof Uint8Array||ArrayBuffer.isView(e)&&e.constructor.name==="Uint8Array"}function Ml(e){if(typeof e!="boolean")throw new Error(`boolean expected, not ${e}`)}function Ic(e){if(!Number.isSafeInteger(e)||e<0)throw new Error("positive integer expected, got "+e)}function oe(e,t,n=""){let r=Dl(e),o=e?.length,s=t!==void 0;if(!r||s&&o!==t){let i=n&&`"${n}" `,c=s?` of length ${t}`:"",a=r?`length=${o}`:`type=${typeof e}`;throw new Error(i+"expected Uint8Array"+c+", got "+a)}return e}function Tn(e,t=!0){if(e.destroyed)throw new Error("Hash instance has been destroyed");if(t&&e.finished)throw new Error("Hash#digest() has already been called")}function rs(e,t){oe(e,void 0,"output");let n=t.outputLen;if(e.length<n)throw new Error("digestInto() expects output buffer of length at least "+n)}function Uc(e){return new Uint8Array(e.buffer,e.byteOffset,e.byteLength)}function He(e){return new Uint32Array(e.buffer,e.byteOffset,Math.floor(e.byteLength/4))}function Ce(...e){for(let t=0;t<e.length;t++)e[t].fill(0)}function Zt(e){return new DataView(e.buffer,e.byteOffset,e.byteLength)}var Wl=new Uint8Array(new Uint32Array([287454020]).buffer)[0]===68;function Lc(...e){let t=0;for(let r=0;r<e.length;r++){let o=e[r];oe(o),t+=o.length}let n=new Uint8Array(t);for(let r=0,o=0;r<e.length;r++){let s=e[r];n.set(s,o),o+=s.length}return n}function $c(e,t){if(e.length!==t.length)return!1;let n=0;for(let r=0;r<e.length;r++)n|=e[r]^t[r];return n===0}var Oc=(e,t)=>{function n(r,...o){if(oe(r,void 0,"key"),!Wl)throw new Error("Non little-endian hardware is not yet supported");if(e.nonceLength!==void 0){let u=o[0];oe(u,e.varSizeNonce?void 0:e.nonceLength,"nonce")}let s=e.tagLength;s&&o[1]!==void 0&&oe(o[1],void 0,"AAD");let i=t(r,...o),c=(u,f)=>{if(f!==void 0){if(u!==2)throw new Error("cipher output not supported");oe(f,void 0,"output")}},a=!1;return{encrypt(u,f){if(a)throw new Error("cannot encrypt() twice with same key + nonce");return a=!0,oe(u),c(i.encrypt.length,f),i.encrypt(u,f)},decrypt(u,f){if(oe(u),s&&u.length<s)throw new Error('"ciphertext" expected length bigger than tagLength='+s);return c(i.decrypt.length,f),i.decrypt(u,f)}}}return Object.assign(n,e),n};function Cc(e,t,n=!0){if(t===void 0)return new Uint8Array(e);if(t.length!==e)throw new Error('"output" expected Uint8Array of length '+e+", got: "+t.length);if(n&&!Pn(t))throw new Error("invalid output, must be aligned");return t}function Rc(e,t,n){Ml(n);let r=new Uint8Array(16),o=Zt(r);return o.setBigUint64(0,BigInt(t),n),o.setBigUint64(8,BigInt(e),n),r}function Pn(e){return e.byteOffset%4===0}function at(e){return Uint8Array.from(e)}function Vl(e=32){let t=typeof globalThis=="object"?globalThis.crypto:null;if(typeof t?.getRandomValues!="function")throw new Error("crypto.getRandomValues must be defined");return t.getRandomValues(new Uint8Array(e))}function os(e,t=Vl){let{nonceLength:n}=e;Ic(n);let r=(o,s)=>{let i=Lc(o,s);return s.fill(0),i};return((o,...s)=>({encrypt(i){oe(i);let c=t(n),a=e(o,c,...s).encrypt(i);return a instanceof Promise?a.then(l=>r(c,l)):r(c,a)},decrypt(i){oe(i);let c=i.subarray(0,n),a=i.subarray(n);return e(o,c,...s).decrypt(a)}}))}var lt=16,is=new Uint8Array(16),Xe=He(is),ql=225,zl=(e,t,n,r)=>{let o=r&1;return{s3:n<<31|r>>>1,s2:t<<31|n>>>1,s1:e<<31|t>>>1,s0:e>>>1^ql<<24&-(o&1)}},Ke=e=>(e>>>0&255)<<24|(e>>>8&255)<<16|(e>>>16&255)<<8|e>>>24&255|0;function jl(e){e.reverse();let t=e[15]&1,n=0;for(let r=0;r<e.length;r++){let o=e[r];e[r]=o>>>1|n,n=(o&1)<<7}return e[0]^=-t&225,e}var Yl=e=>e>64*1024?8:e>1024?4:2,Br=class{constructor(t,n){y(this,"blockLen",lt);y(this,"outputLen",lt);y(this,"s0",0);y(this,"s1",0);y(this,"s2",0);y(this,"s3",0);y(this,"finished",!1);y(this,"t");y(this,"W");y(this,"windowSize");oe(t,16,"key"),t=at(t);let r=Zt(t),o=r.getUint32(0,!1),s=r.getUint32(4,!1),i=r.getUint32(8,!1),c=r.getUint32(12,!1),a=[];for(let p=0;p<128;p++)a.push({s0:Ke(o),s1:Ke(s),s2:Ke(i),s3:Ke(c)}),{s0:o,s1:s,s2:i,s3:c}=zl(o,s,i,c);let l=Yl(n||1024);if(![1,2,4,8].includes(l))throw new Error("ghash: invalid window size, expected 2, 4 or 8");this.W=l;let f=128/l,d=this.windowSize=2**l,h=[];for(let p=0;p<f;p++)for(let w=0;w<d;w++){let m=0,E=0,v=0,k=0;for(let T=0;T<l;T++){if(!(w>>>l-T-1&1))continue;let{s0:O,s1:te,s2:G,s3:M}=a[l*p+T];m^=O,E^=te,v^=G,k^=M}h.push({s0:m,s1:E,s2:v,s3:k})}this.t=h}_updateBlock(t,n,r,o){t^=this.s0,n^=this.s1,r^=this.s2,o^=this.s3;let{W:s,t:i,windowSize:c}=this,a=0,l=0,u=0,f=0,d=(1<<s)-1,h=0;for(let p of[t,n,r,o])for(let w=0;w<4;w++){let m=p>>>8*w&255;for(let E=8/s-1;E>=0;E--){let v=m>>>s*E&d,{s0:k,s1:T,s2:$,s3:O}=i[h*c+v];a^=k,l^=T,u^=$,f^=O,h+=1}}this.s0=a,this.s1=l,this.s2=u,this.s3=f}update(t){Tn(this),oe(t),t=at(t);let n=He(t),r=Math.floor(t.length/lt),o=t.length%lt;for(let s=0;s<r;s++)this._updateBlock(n[s*4+0],n[s*4+1],n[s*4+2],n[s*4+3]);return o&&(is.set(t.subarray(r*lt)),this._updateBlock(Xe[0],Xe[1],Xe[2],Xe[3]),Ce(Xe)),this}destroy(){let{t}=this;for(let n of t)n.s0=0,n.s1=0,n.s2=0,n.s3=0}digestInto(t){Tn(this),rs(t,this),this.finished=!0;let{s0:n,s1:r,s2:o,s3:s}=this,i=He(t);return i[0]=n,i[1]=r,i[2]=o,i[3]=s,t}digest(){let t=new Uint8Array(lt);return this.digestInto(t),this.destroy(),t}},ss=class extends Br{constructor(t,n){oe(t);let r=jl(at(t));super(r,n),Ce(r)}update(t){Tn(this),oe(t),t=at(t);let n=He(t),r=t.length%lt,o=Math.floor(t.length/lt);for(let s=0;s<o;s++)this._updateBlock(Ke(n[s*4+3]),Ke(n[s*4+2]),Ke(n[s*4+1]),Ke(n[s*4+0]));return r&&(is.set(t.subarray(o*lt)),this._updateBlock(Ke(Xe[3]),Ke(Xe[2]),Ke(Xe[1]),Ke(Xe[0])),Ce(Xe)),this}digestInto(t){Tn(this),rs(t,this),this.finished=!0;let{s0:n,s1:r,s2:o,s3:s}=this,i=He(t);return i[0]=n,i[1]=r,i[2]=o,i[3]=s,t.reverse()}};function Nc(e){let t=(r,o)=>e(o,r.length).update(r).digest(),n=e(new Uint8Array(16),0);return t.outputLen=n.outputLen,t.blockLen=n.blockLen,t.create=(r,o)=>e(r,o),t}var cs=Nc((e,t)=>new Br(e,t)),Fl=Nc((e,t)=>new ss(e,t));var Re=16,Gl=4,Ar=new Uint8Array(Re);var Zl=283;function Kc(e){if(![16,24,32].includes(e.length))throw new Error('"aes key" expected Uint8Array of length 16/24/32, got length='+e.length)}function fs(e){return e<<1^Zl&-(e>>7)}function _c(e,t){let n=0;for(;t>0;t>>=1)n^=e&-(t&1),e=fs(e);return n}var Xl=(()=>{let e=new Uint8Array(256);for(let n=0,r=1;n<256;n++,r^=fs(r))e[n]=r;let t=new Uint8Array(256);t[0]=99;for(let n=0;n<255;n++){let r=e[255-n];r|=r<<8,t[e[n]]=(r^r>>4^r>>5^r>>6^r>>7^99)&255}return Ce(e),t})();var Ql=e=>e<<24|e>>>8,as=e=>e<<8|e>>>24;function Jl(e,t){if(e.length!==256)throw new Error("Wrong sbox length");let n=new Uint32Array(256).map((l,u)=>t(e[u])),r=n.map(as),o=r.map(as),s=o.map(as),i=new Uint32Array(256*256),c=new Uint32Array(256*256),a=new Uint16Array(256*256);for(let l=0;l<256;l++)for(let u=0;u<256;u++){let f=l*256+u;i[f]=n[l]^r[u],c[f]=o[l]^s[u],a[f]=e[l]<<8|e[u]}return{sbox:e,sbox2:a,T0:n,T1:r,T2:o,T3:s,T01:i,T23:c}}var Dc=Jl(Xl,e=>_c(e,3)<<24|e<<16|e<<8|_c(e,2));var eu=(()=>{let e=new Uint8Array(16);for(let t=0,n=1;t<16;t++,n=fs(n))e[t]=n;return e})();function Mc(e){oe(e);let t=e.length;Kc(e);let{sbox2:n}=Dc,r=[];Pn(e)||r.push(e=at(e));let o=He(e),s=o.length,i=a=>In(n,a,a,a,a),c=new Uint32Array(t+28);c.set(o);for(let a=s;a<c.length;a++){let l=c[a-1];a%s===0?l=i(Ql(l))^eu[a/s-1]:s>6&&a%s===4&&(l=i(l)),c[a]=c[a-s]^l}return Ce(...r),c}function Tr(e,t,n,r,o,s){return e[n<<8&65280|r>>>8&255]^t[o>>>8&65280|s>>>24&255]}function In(e,t,n,r,o){return e[t&255|n&65280]|e[r>>>16&255|o>>>16&65280]<<16}function us(e,t,n,r,o){let{sbox2:s,T01:i,T23:c}=Dc,a=0;t^=e[a++],n^=e[a++],r^=e[a++],o^=e[a++];let l=e.length/4-2;for(let p=0;p<l;p++){let w=e[a++]^Tr(i,c,t,n,r,o),m=e[a++]^Tr(i,c,n,r,o,t),E=e[a++]^Tr(i,c,r,o,t,n),v=e[a++]^Tr(i,c,o,t,n,r);t=w,n=m,r=E,o=v}let u=e[a++]^In(s,t,n,r,o),f=e[a++]^In(s,n,r,o,t),d=e[a++]^In(s,r,o,t,n),h=e[a++]^In(s,o,t,n,r);return{s0:u,s1:f,s2:d,s3:h}}function Pr(e,t,n,r,o){oe(n,Re,"nonce"),oe(r),o=Cc(r.length,o);let s=n,i=He(s),c=Zt(s),a=He(r),l=He(o),u=t?0:12,f=r.length,d=c.getUint32(u,t),{s0:h,s1:p,s2:w,s3:m}=us(e,i[0],i[1],i[2],i[3]);for(let v=0;v+4<=a.length;v+=4)l[v+0]=a[v+0]^h,l[v+1]=a[v+1]^p,l[v+2]=a[v+2]^w,l[v+3]=a[v+3]^m,d=d+1>>>0,c.setUint32(u,d,t),{s0:h,s1:p,s2:w,s3:m}=us(e,i[0],i[1],i[2],i[3]);let E=Re*Math.floor(a.length/Gl);if(E<f){let v=new Uint32Array([h,p,w,m]),k=Uc(v);for(let T=E,$=0;T<f;T++,$++)o[T]=r[T]^k[$];Ce(v)}return o}function tu(e,t,n,r,o){let s=o?o.length:0,i=e.create(n,r.length+s);o&&i.update(o);let c=Rc(8*r.length,8*s,t);i.update(r),i.update(c);let a=i.digest();return Ce(c),a}var ds=Oc({blockSize:16,nonceLength:12,tagLength:16,varSizeNonce:!0},function(t,n,r){if(n.length<8)throw new Error("aes/gcm: invalid nonce length");let o=16;function s(c,a,l){let u=tu(cs,!1,c,l,r);for(let f=0;f<a.length;f++)u[f]^=a[f];return u}function i(){let c=Mc(t),a=Ar.slice(),l=Ar.slice();if(Pr(c,!1,l,l,a),n.length===12)l.set(n);else{let f=Ar.slice();Zt(f).setBigUint64(8,BigInt(n.length*8),!1);let h=cs.create(a).update(n).update(f);h.digestInto(l),h.destroy()}let u=Pr(c,!1,l,Ar);return{xk:c,authKey:a,counter:l,tagMask:u}}return{encrypt(c){let{xk:a,authKey:l,counter:u,tagMask:f}=i(),d=new Uint8Array(c.length+o),h=[a,l,u,f];Pn(c)||h.push(c=at(c)),Pr(a,!1,u,c,d.subarray(0,c.length));let p=s(l,f,d.subarray(0,d.length-o));return h.push(p),d.set(p,c.length),Ce(...h),d},decrypt(c){let{xk:a,authKey:l,counter:u,tagMask:f}=i(),d=[a,l,f,u];Pn(c)||d.push(c=at(c));let h=c.subarray(0,-o),p=c.subarray(-o),w=s(l,f,h);if(d.push(w),!$c(w,p))throw new Error("aes/gcm: invalid ghash tag");let m=Pr(a,!1,u,h);return Ce(...d),m}}});function nu(e){return e instanceof Uint32Array||ArrayBuffer.isView(e)&&e.constructor.name==="Uint32Array"}function ls(e,t){if(oe(t,16,"block"),!nu(e))throw new Error("_encryptBlock accepts result of expandKeyLE");let n=He(t),{s0:r,s1:o,s2:s,s3:i}=us(e,n[0],n[1],n[2],n[3]);return n[0]=r,n[1]=o,n[2]=s,n[3]=i,t}function Hc(e){let t=0;for(let n=Re-1;n>=0;n--){let r=(e[n]&128)>>>7;e[n]=e[n]<<1|t,t=r}return t&&(e[Re-1]^=135),e}function Ir(e,t){if(e.length!==t.length)throw new Error("xorBlock: blocks must have same length");for(let n=0;n<e.length;n++)e[n]=e[n]^t[n];return e}var Ur=class{constructor(t){y(this,"buffer");y(this,"destroyed");y(this,"k1");y(this,"k2");y(this,"xk");oe(t),Kc(t),this.xk=Mc(t),this.buffer=new Uint8Array(0),this.destroyed=!1;let n=new Uint8Array(Re);ls(this.xk,n),this.k1=Hc(n),this.k2=Hc(new Uint8Array(this.k1))}update(t){let{destroyed:n,buffer:r}=this;if(n)throw new Error("CMAC instance was destroyed");oe(t);let o=new Uint8Array(r.length+t.length);return o.set(r),o.set(t,r.length),this.buffer=o,this}digest(){if(this.destroyed)throw new Error("CMAC instance was destroyed");let{buffer:t}=this,n=t.length,r=Math.ceil(n/Re),o;r===0?(r=1,o=!1):o=n%Re===0;let s=(r-1)*Re,i=t.subarray(s),c;if(o)c=Ir(new Uint8Array(i),this.k1);else{let l=new Uint8Array(Re);l.set(i),l[i.length]=128,c=Ir(l,this.k2)}let a=new Uint8Array(Re);for(let l=0;l<r-1;l++){let u=t.subarray(l*Re,(l+1)*Re);Ir(a,u),ls(this.xk,a)}return Ir(a,c),ls(this.xk,a),Ce(c),a}destroy(){let{buffer:t,destroyed:n,xk:r,k1:o,k2:s}=this;n||(this.destroyed=!0,Ce(t,r,o,s))}},ru=(e,t)=>new Ur(e).update(t).digest();ru.create=e=>new Ur(e);var qc="Bitweb Wallet",ou="1.0.0",su="bitweb-wallet-v1",Qe="vault",iu=20,cu=200,ps={N:2**15,r:8,p:1,dkLen:32},Nr="main",Y={electrumUrl:"wss://electrumx.bitwebcore.net:20003",explorerUrl:"https://explorer.bitwebcore.net",bech32:"web",pubKeyHash:33,scriptHash:30,wif:128,xpubVersion:76067358,xprvVersion:76066276,coinType:0,account:0,addressType:"p2wpkh",feeRate:1,gapLimit:iu,maxScan:cu},gs={p2pkh:44,"p2sh-p2wpkh":49,p2wpkh:84},zc={p2pkh:"Legacy P2PKH","p2sh-p2wpkh":"Nested SegWit",p2wpkh:"Native SegWit"},au=new TextEncoder,lu=new TextDecoder;function uu(){try{let e=localStorage.getItem("bitweb-public-config");if(!e)return{...Y};let t=JSON.parse(e);return Qt({...Y,...t})}catch{return{...Y}}}function Un(e){localStorage.setItem("bitweb-public-config",JSON.stringify(e))}function Qt(e){let t={...Y,...e};return t.electrumUrl=String(t.electrumUrl||Y.electrumUrl).trim(),t.explorerUrl=String(t.explorerUrl||Y.explorerUrl).trim().replace(/\/+$/,""),t.bech32=String(t.bech32||Y.bech32).trim(),t.pubKeyHash=Be(t.pubKeyHash,Y.pubKeyHash),t.scriptHash=Be(t.scriptHash,Y.scriptHash),t.wif=Be(t.wif,Y.wif),t.xpubVersion=Lr(t.xpubVersion,Y.xpubVersion),t.xprvVersion=Lr(t.xprvVersion,Y.xprvVersion),t.coinType=Be(t.coinType,Y.coinType),t.account=Be(t.account,Y.account),t.addressType=Object.hasOwn(gs,t.addressType)?t.addressType:Y.addressType,t.feeRate=Math.max(1,Number(t.feeRate||Y.feeRate)),t.gapLimit=Math.max(1,Be(t.gapLimit,Y.gapLimit)),t.maxScan=Math.max(t.gapLimit,Be(t.maxScan,Y.maxScan)),t}function Be(e,t){let n=Number.parseInt(String(e),10);return Number.isFinite(n)?n:t}function Lr(e,t){if(typeof e=="number"&&Number.isFinite(e))return e>>>0;let n=String(e||"").trim().replace(/^0x/i,"");if(!n)return t>>>0;let r=Number.parseInt(n,16);return Number.isFinite(r)?r>>>0:t>>>0}function ws(e){return(e>>>0).toString(16).padStart(8,"0").toUpperCase()}function ys(e){return Me(e)}function $r(e){return et(String(e).trim())}function jc(e){let t=new Uint8Array(e);return globalThis.crypto.getRandomValues(t),t}function fu(e){let t=e.slice();return t.reverse(),t}function du(e){return Me(fu(q(e)))}function ne(e){return String(e).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}function Xt(e){let t=e<0n,n=t?-e:e,r=n/100000000n,o=(n%100000000n).toString().padStart(8,"0").replace(/0+$/,""),s=o.length?`${r.toString()}.${o}`:r.toString();return t?`-${s}`:s}function hu(e){let t=String(e).trim();if(!t)throw new Error("Amount is required");if(!/^\d+(\.\d{1,8})?$/.test(t))throw new Error("Amount must have up to 8 decimals");let[n,r=""]=t.split(".");return BigInt(n)*100000000n+BigInt((r+"00000000").slice(0,8))}function ms(e,t=6,n=6){let r=String(e);return r.length<=t+n+3?r:`${r.slice(0,t)}\u2026${r.slice(-n)}`}function pu(e){return gs[e]||gs.p2wpkh}function bs(e){return{bech32:e.bech32,pubKeyHash:e.pubKeyHash,scriptHash:e.scriptHash,wif:e.wif}}function gu(e){return{private:e.xprvVersion>>>0,public:e.xpubVersion>>>0}}function xs(e){return`m/${pu(e.addressType)}'/${e.coinType}'/${e.account}'`}function wu(e,t){let n=bs(t);if(t.addressType==="p2pkh")return Fo(e,n);if(t.addressType==="p2sh-p2wpkh"){let r=kn(e,n);return Go(r,n)}return kn(e,n)}function Es(e,t,n,r){let o=e.deriveChild(t).deriveChild(n),s=o.privateKey,i=o.publicKey;if(!i)throw new Error("Cannot derive public key");let c=wu(i,r),a=c.script,l=c.redeemScript??null,u=c.address;if(!u)throw new Error("Cannot derive address");return{branch:t,index:n,path:`${xs(r)}/${t}/${n}`,node:o,privKey:s,pubKey:i,payment:c,address:u,script:a,redeemScript:l,scripthash:du(a),history:[],unspent:[]}}function yu(e){return e.history&&e.history.length>0||e.unspent&&e.unspent.length>0}function Wc(e){return Array.isArray(e)?e:e?Array.isArray(e.result)?e.result:[]:[]}function mu(e){let t=e&&typeof e=="object"?e:{},n=BigInt(t.confirmed??0),r=BigInt(t.unconfirmed??0);return{confirmed:n,unconfirmed:r}}function Or(e){return typeof e=="string"?e:e instanceof Uint8Array?Me(e):String(e)}function Yc(e){return String(e||"").trim().replace(/\/+$/,"")}var Cr=class{constructor(t){this.url=t,this.ws=null,this.id=0,this.pending=new Map,this.subscriptions=new Map,this.connected=!1,this.serverInfo=null}async connect(){if(this.ws&&(this.ws.readyState===WebSocket.OPEN||this.ws.readyState===WebSocket.CONNECTING))return;let t=new WebSocket(this.url);this.ws=t;let n=!1,r=()=>{s&&clearTimeout(s),t&&(t.onopen=null,t.onerror=null,t.onclose=null,t.onmessage=null)},o=i=>{for(let[c,a]of this.pending)a.reject(i);this.pending.clear()},s=setTimeout(()=>{n||(n=!0,r(),this.ws===t&&(this.ws=null),o(new Error("Electrum connection timed out")))},15e3);await new Promise((i,c)=>{let a=u=>{n||(n=!0,r(),this.ws===t&&(this.ws=null),c(u))},l=()=>{n||(n=!0,r(),i())};t.onmessage=u=>this.handleMessage(u.data),t.onclose=()=>{this.connected=!1,this.serverInfo=null,o(new Error("Electrum connection closed")),n||a(new Error("Electrum connection closed"))},t.onerror=()=>{n||(o(new Error("Electrum websocket error")),a(new Error("Electrum websocket error")))},t.onopen=async()=>{try{if(this.ws!==t)return;let u=await this.call("server.version",[qc,["1.4","1.5"]]);this.serverInfo=u,this.connected=!0,l()}catch(u){a(u)}}})}close(){if(this.ws)try{this.ws.close()}catch{}this.connected=!1,this.ws=null}send(t,n){if(!this.ws||this.ws.readyState!==WebSocket.OPEN)throw new Error("Electrum websocket is not open");return this.ws.send(JSON.stringify({jsonrpc:"2.0",id:++this.id,method:t,params:n})),this.id}call(t,n=[]){return new Promise((r,o)=>{let s=++this.id,i={jsonrpc:"2.0",id:s,method:t,params:n};this.pending.set(s,{resolve:r,reject:o});try{this.ws.send(JSON.stringify(i))}catch(c){this.pending.delete(s),o(c)}})}async ping(){return await this.call("server.ping",[])}async getHistory(t){return Wc(await this.call("blockchain.scripthash.get_history",[t]))}async getBalance(t){return mu(await this.call("blockchain.scripthash.get_balance",[t]))}async listUnspent(t){return Wc(await this.call("blockchain.scripthash.listunspent",[t]))}async getTransaction(t){let n=await this.call("blockchain.transaction.get",[t,!1]);if(typeof n!="string")throw new Error("Unexpected transaction payload");return n}async broadcast(t){let n=await this.call("blockchain.transaction.broadcast",[t]);return typeof n=="string"?n:String(n)}async subscribeScripthash(t,n){let r=await this.call("blockchain.scripthash.subscribe",[t]);return this.subscriptions.set(t,n),r}async unsubscribeScripthash(t){this.subscriptions.delete(t);try{return await this.call("blockchain.scripthash.unsubscribe",[t])}catch{return!1}}handleMessage(t){let n;try{n=JSON.parse(t)}catch{return}if(n&&Object.hasOwn(n,"id")){let r=this.pending.get(n.id);if(!r)return;if(this.pending.delete(n.id),n.error){let o=new Error(n.error.message||"Electrum error");o.code=n.error.code,o.data=n.error.data,r.reject(o)}else r.resolve(n.result);return}if(n&&n.method&&Array.isArray(n.params)){if(n.method==="blockchain.scripthash.subscribe"&&n.params.length>=2){let[r,o]=n.params,s=this.subscriptions.get(r);s&&s(o)}n.method}}},g={publicConfig:uu(),vaultExists:!1,unlocked:!1,electrumConnected:!1,walletName:"Main wallet",root:null,accountRoot:null,masterFingerprint:0,mnemonic:"",bip39Passphrase:"",generatedMnemonic:"",nextExternalIndex:0,nextChangeIndex:0,externalRecords:[],changeRecords:[],utxos:[],balance:{confirmed:0n,unconfirmed:0n},explorerAddressInfo:null,explorerAddressTxs:[],selectedAddressDetail:null,electrum:null,message:"",messageKind:"info",busy:!1,syncBusy:!1,pendingRefresh:!1,pendingSubClear:[]};function Z(e,t="info"){g.message=e,g.messageKind=t,qe()}function hs(e){g.busy=e,qe()}function bu(e=g.publicConfig){return`
+    <div class="grid2">
+      <label>Electrum WSS endpoint
+        <input id="cfg-electrumUrl" type="text" value="${ne(e.electrumUrl)}" spellcheck="false">
+      </label>
+      <label>Explorer base URL
+        <input id="cfg-explorerUrl" type="text" value="${ne(e.explorerUrl)}" spellcheck="false">
+      </label>
+      <label>Bech32 HRP
+        <input id="cfg-bech32" type="text" value="${ne(e.bech32)}" spellcheck="false">
+      </label>
+      <label>Address type
+        <select id="cfg-addressType">
+          ${Object.entries(zc).map(([t,n])=>`<option value="${t}" ${t===e.addressType?"selected":""}>${n}</option>`).join("")}
+        </select>
+      </label>
+      <label>pubKeyHash (version byte)
+        <input id="cfg-pubKeyHash" type="number" min="0" max="255" value="${e.pubKeyHash}">
+      </label>
+      <label>scriptHash (version byte)
+        <input id="cfg-scriptHash" type="number" min="0" max="255" value="${e.scriptHash}">
+      </label>
+      <label>wif (version byte)
+        <input id="cfg-wif" type="number" min="0" max="255" value="${e.wif}">
+      </label>
+      <label>Coin type (BIP44 coin_type)
+        <input id="cfg-coinType" type="number" min="0" value="${e.coinType}">
+      </label>
+      <label>Account
+        <input id="cfg-account" type="number" min="0" value="${e.account}">
+      </label>
+      <label>XPUB version (hex)
+        <input id="cfg-xpubVersion" type="text" value="${ws(e.xpubVersion)}" spellcheck="false">
+      </label>
+      <label>XPRV version (hex)
+        <input id="cfg-xprvVersion" type="text" value="${ws(e.xprvVersion)}" spellcheck="false">
+      </label>
+      <label>Fee rate (sat/vB)
+        <input id="cfg-feeRate" type="number" min="1" value="${e.feeRate}">
+      </label>
+      <label>Gap limit
+        <input id="cfg-gapLimit" type="number" min="1" value="${e.gapLimit}">
+      </label>
+      <label>Max scan
+        <input id="cfg-maxScan" type="number" min="${e.gapLimit}" value="${e.maxScan}">
+      </label>
+    </div>
+    <div class="row">
+      <button class="primary" id="save-config-btn" type="button">Save config</button>
+      <button id="reset-config-btn" type="button">Reset defaults</button>
+    </div>
+  `}function xu(){return`
+    <section class="card">
+      <h2>Create or restore</h2>
+      <p class="muted">Mnemonic generation uses <code>crypto.getRandomValues()</code>. The vault is encrypted locally with scrypt + AES-GCM and stored in IndexedDB only.</p>
+      <div class="stack">
+        <label>Generated mnemonic
+          <textarea id="generated-mnemonic" rows="4" spellcheck="false" placeholder="Click Generate first">${ne(g.generatedMnemonic)}</textarea>
+        </label>
+        <label>BIP39 passphrase (optional)
+          <input id="setup-bip39-passphrase" type="password" autocomplete="new-password" placeholder="Optional extra seed passphrase">
+        </label>
+        <label>Local vault password
+          <input id="setup-vault-password" type="password" autocomplete="new-password" placeholder="Required to encrypt the vault">
+        </label>
+        <label><input id="setup-confirm" type="checkbox"> I wrote down the mnemonic offline</label>
+        <div class="row">
+          <button id="generate-mnemonic-btn" type="button">Generate mnemonic</button>
+          <button class="primary" id="create-wallet-btn" type="button">Create and unlock</button>
+        </div>
+      </div>
+      <hr>
+      <h3>Restore existing wallet</h3>
+      <div class="stack">
+        <label>Mnemonic
+          <textarea id="restore-mnemonic" rows="4" spellcheck="false" placeholder="Paste 12 or 24 words here"></textarea>
+        </label>
+        <label>BIP39 passphrase (optional)
+          <input id="restore-bip39-passphrase" type="password" autocomplete="current-password" placeholder="Must match the original passphrase">
+        </label>
+        <label>Local vault password
+          <input id="restore-vault-password" type="password" autocomplete="new-password" placeholder="Password for the encrypted browser vault">
+        </label>
+        <div class="row">
+          <button class="primary" id="restore-wallet-btn" type="button">Restore and unlock</button>
+        </div>
+      </div>
+    </section>
+  `}function Eu(){return g.vaultExists?`
+    <section class="card">
+      <h2>Unlock saved wallet</h2>
+      <p class="muted">The encrypted vault is stored in IndexedDB. Only the local password can unlock it.</p>
+      <label>Vault password
+        <input id="unlock-password" type="password" autocomplete="current-password" placeholder="Enter password">
+      </label>
+      <div class="row">
+        <button class="primary" id="unlock-wallet-btn" type="button">Unlock</button>
+        <button id="delete-vault-btn" type="button">Delete vault</button>
+      </div>
+    </section>
+  `:`
+      <section class="card">
+        <h2>Vault</h2>
+        <p class="muted">No saved wallet was found yet.</p>
+      </section>
+    `}function vu(){if(!g.unlocked)return"";let e=g.publicConfig,t=Rr(),n=Fc(),r=g.accountRoot?.publicExtendedKey||"",o=g.accountRoot?.privateExtendedKey||"";return`
+    <section class="card wide">
+      <div class="row between">
+        <div>
+          <h2>${ne(g.walletName)}</h2>
+          <div class="muted">Path: <code>${ne(xs(e))}</code></div>
+          <div class="muted">Fingerprint: <code>${ws(g.masterFingerprint)}</code></div>
+        </div>
+        <div class="row">
+          <button id="refresh-wallet-btn" type="button">Refresh</button>
+          <button id="lock-wallet-btn" type="button">Lock</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="row between">
+          <div>
+            <h3>Receive</h3>
+            <div class="muted">Next external address index: ${g.nextExternalIndex}</div>
+          </div>
+          <div class="row">
+            <button id="copy-receive-btn" type="button">Copy</button>
+            <button id="next-receive-btn" type="button">Next address</button>
+          </div>
+        </div>
+        <div class="mono box" id="receive-address">${ne(t?.address||"\u2014")}</div>
+        <div class="muted">Change index: ${g.nextChangeIndex} \xB7 Change address: <span class="mono">${ne(n?.address||"\u2014")}</span></div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <h3>Keys</h3>
+          <div class="mono smallbox">XPUB: ${ne(r)}</div>
+          <div class="muted">XPRV is kept in memory only and is never displayed by default.</div>
+          <details>
+            <summary>Reveal XPRV locally</summary>
+            <div class="mono smallbox">${ne(o)}</div>
+          </details>
+        </div>
+        <div class="panel">
+          <h3>Status</h3>
+          <div class="statusline">Electrum: ${g.electrumConnected?'<span class="ok">connected</span>':'<span class="bad">offline</span>'}</div>
+          <div class="statusline">Storage: <span class="ok">encrypted IndexedDB</span></div>
+          <div class="statusline">Randomness: <span class="ok">crypto.getRandomValues()</span></div>
+          <div class="statusline">Explorer: <span class="ok">${ne(Yc(e.explorerUrl))}</span></div>
+        </div>
+      </div>
+    </section>
+  `}function Su(){if(!g.unlocked)return"";let e=Xt(g.balance.confirmed),t=Xt(g.balance.unconfirmed),n=Xt(g.balance.confirmed+g.balance.unconfirmed);return`
+    <section class="card">
+      <h2>Balance</h2>
+      <div class="grid3">
+        <div class="metric"><div class="label">Confirmed</div><div class="value">${e}</div></div>
+        <div class="metric"><div class="label">Unconfirmed</div><div class="value">${t}</div></div>
+        <div class="metric"><div class="label">Total</div><div class="value">${n}</div></div>
+      </div>
+    </section>
+  `}function ku(){return g.unlocked?`
+    <section class="card">
+      <h2>Send</h2>
+      <div class="grid2">
+        <label>Recipient address
+          <input id="send-to" type="text" spellcheck="false" placeholder="Destination address">
+        </label>
+        <label>Amount (coin units)
+          <input id="send-amount" type="text" inputmode="decimal" placeholder="0.00000000">
+        </label>
+        <label>Fee rate (sat/vB)
+          <input id="send-fee-rate" type="number" min="1" value="${g.publicConfig.feeRate}">
+        </label>
+        <label>Spendable mode
+          <input type="text" value="${zc[g.publicConfig.addressType]}" disabled>
+        </label>
+      </div>
+      <div class="row">
+        <button class="primary" id="send-tx-btn" type="button">Build, sign and broadcast</button>
+      </div>
+      <div class="muted">The wallet only signs locally. ElectrumX receives the final raw transaction for broadcast.</div>
+      <pre class="log" id="send-output">${ne(g.messageKind==="send"?g.message:"")}</pre>
+    </section>
+  `:""}function Bu(){return g.unlocked?`
+    <section class="card">
+      <h2>Spendable UTXOs</h2>
+      <div class="muted">Discovered from Electrum scripthash listunspent. These are the inputs used for coin selection.</div>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>Outpoint</th><th>Address</th><th>Branch</th><th>Index</th><th>Value</th><th>Status</th></tr>
+          </thead>
+          <tbody>${g.utxos.map(t=>`
+    <tr>
+      <td class="mono">${ne(ms(t.txid))}:${t.index}</td>
+      <td class="mono">${ne(ms(t.address,10,8))}</td>
+      <td>${ne(t.branch===0?"receive":"change")}</td>
+      <td>${ne(String(t.derivationIndex))}</td>
+      <td>${ne(Xt(t.value))}</td>
+      <td>${t.height>0?`confirmed @ ${t.height}`:"mempool"}</td>
+    </tr>
+  `).join("")||'<tr><td colspan="6" class="muted">No UTXOs found.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </section>
+  `:""}function Au(){if(!g.unlocked||!g.selectedAddressDetail)return"";let e=g.selectedAddressDetail,t=g.explorerAddressTxs||[],n=Array.isArray(t)?t.map(r=>{let o=r.txid||r.hash||r.tx_hash||r.id||"",s=r.height??r.block_height??r.confirmations??"\u2014",i=r.value??r.amount??r.sats??r.balance??"",c=r.time??r.timestamp??r.date??"";return`
+      <tr>
+        <td class="mono">${ne(ms(o,8,8))}</td>
+        <td>${ne(String(s))}</td>
+        <td>${ne(i===""?"\u2014":String(i))}</td>
+        <td>${ne(c?String(c):"\u2014")}</td>
+      </tr>
+    `}).join(""):"";return`
+    <section class="card">
+      <h2>Explorer view</h2>
+      <div class="muted">Address: <span class="mono">${ne(e.address)}</span></div>
+      <div class="muted">Explorer balance: ${e.balanceText||"\u2014"}</div>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>Txid</th><th>Height</th><th>Value</th><th>Time</th></tr>
+          </thead>
+          <tbody>${n||'<tr><td colspan="4" class="muted">No transaction history returned.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </section>
+  `}function Tu(){return`
+    <div class="statusbar ${g.messageKind==="error"?"bad":g.messageKind==="ok"?"ok":"info"}">
+      <span>${ne(g.message||"Ready")}</span>
+      ${g.busy?'<span class="spinner">Working\u2026</span>':""}
+    </div>
+  `}function qe(){let e=document.getElementById("app");e&&(e.innerHTML=`
+    <div class="shell">
+      <header class="header">
+        <div>
+          <div class="title">${qc}</div>
+          <div class="subtitle">Standalone static wallet \xB7 v${ou}</div>
+        </div>
+        <div class="row">
+          <span class="pill">local</span>
+          <span class="pill">${g.vaultExists?"vault saved":"no vault"}</span>
+          <span class="pill">${g.unlocked?"unlocked":"locked"}</span>
+        </div>
+      </header>
+
+      ${Tu()}
+
+      <section class="card">
+        <h2>Network config</h2>
+        <p class="muted">All network-specific values remain configurable: Electrum WSS, explorer URL, bech32 HRP and address version bytes.</p>
+        ${bu()}
+      </section>
+
+      <div class="grid2">
+        ${xu()}
+        ${Eu()}
+      </div>
+
+      ${vu()}
+      ${Su()}
+      ${ku()}
+      ${Bu()}
+      ${Au()}
+    </div>
+  `,Pu())}function Pu(){let e=document.getElementById("generate-mnemonic-btn");e&&(e.onclick=Nu);let t=document.getElementById("create-wallet-btn");t&&(t.onclick=_u);let n=document.getElementById("restore-wallet-btn");n&&(n.onclick=Hu);let r=document.getElementById("unlock-wallet-btn");r&&(r.onclick=Ku);let o=document.getElementById("delete-vault-btn");o&&(o.onclick=Du);let s=document.getElementById("lock-wallet-btn");s&&(s.onclick=Mu);let i=document.getElementById("refresh-wallet-btn");i&&(i.onclick=Wu);let c=document.getElementById("next-receive-btn");c&&(c.onclick=()=>{g.nextExternalIndex++,g.selectedAddressDetail=null,qe()});let a=document.getElementById("copy-receive-btn");a&&(a.onclick=async()=>{let p=Rr()?.address;if(p)try{await navigator.clipboard.writeText(p),Z("Receive address copied to clipboard","ok")}catch(w){Z(`Copy failed: ${w.message}`,"error")}});let l=document.getElementById("send-tx-btn");l&&(l.onclick=zu);let u=document.getElementById("save-config-btn");u&&(u.onclick=ju);let f=document.getElementById("reset-config-btn");f&&(f.onclick=()=>{g.publicConfig={...Y},Un(g.publicConfig),Z("Configuration reset to defaults","ok")});let d=document.getElementById("receive-address");d&&(d.onclick=async()=>{let p=Rr();p&&(await Xc(p.address),g.selectedAddressDetail={address:p.address,balanceText:`${Xt(p.balance.confirmed)} confirmed / ${Xt(p.balance.unconfirmed)} unconfirmed`},qe())});let h=document.getElementById("send-output");h&&(h.textContent=g.messageKind==="send"?g.message:"")}function vs(){let e={electrumUrl:ee("cfg-electrumUrl"),explorerUrl:ee("cfg-explorerUrl"),bech32:ee("cfg-bech32"),addressType:ee("cfg-addressType"),pubKeyHash:Be(ee("cfg-pubKeyHash"),Y.pubKeyHash),scriptHash:Be(ee("cfg-scriptHash"),Y.scriptHash),wif:Be(ee("cfg-wif"),Y.wif),coinType:Be(ee("cfg-coinType"),Y.coinType),account:Be(ee("cfg-account"),Y.account),xpubVersion:Lr(ee("cfg-xpubVersion"),Y.xpubVersion),xprvVersion:Lr(ee("cfg-xprvVersion"),Y.xprvVersion),feeRate:Math.max(1,Be(ee("cfg-feeRate"),Y.feeRate)),gapLimit:Math.max(1,Be(ee("cfg-gapLimit"),Y.gapLimit)),maxScan:Math.max(1,Be(ee("cfg-maxScan"),Y.maxScan))};return Qt(e)}function ee(e){let t=document.getElementById(e);return t?t.value:""}function Rr(){return g.externalRecords.find(e=>e.index===g.nextExternalIndex)||(g.accountRoot?Es(g.accountRoot,0,g.nextExternalIndex,g.publicConfig):null)}function Fc(){return g.changeRecords.find(e=>e.index===g.nextChangeIndex)||(g.accountRoot?Es(g.accountRoot,1,g.nextChangeIndex,g.publicConfig):null)}async function Iu(){let e=await _r();return await new Promise((t,n)=>{let o=e.transaction(Qe,"readonly").objectStore(Qe).get(Nr);o.onsuccess=()=>t(!!o.result),o.onerror=()=>n(o.error)})}async function _r(){return await new Promise((e,t)=>{let n=indexedDB.open(su,1);n.onupgradeneeded=()=>{let r=n.result;r.objectStoreNames.contains(Qe)||r.createObjectStore(Qe)},n.onsuccess=()=>e(n.result),n.onerror=()=>t(n.error||new Error("IndexedDB open failed"))})}async function Gc(e){let t=await _r();await new Promise((n,r)=>{let o=t.transaction(Qe,"readwrite");o.objectStore(Qe).put(e,Nr),o.oncomplete=()=>n(),o.onerror=()=>r(o.error)}),g.vaultExists=!0}async function Uu(){let e=await _r();return await new Promise((t,n)=>{let o=e.transaction(Qe,"readonly").objectStore(Qe).get(Nr);o.onsuccess=()=>t(o.result||null),o.onerror=()=>n(o.error)})}async function Lu(){let e=await _r();await new Promise((t,n)=>{let r=e.transaction(Qe,"readwrite");r.objectStore(Qe).delete(Nr),r.oncomplete=()=>t(),r.onerror=()=>n(r.error)}),g.vaultExists=!1}async function Zc(e,t){let n=jc(16),r=await ns(e,n,ps),o=os(ds)(r),s=au.encode(JSON.stringify(t)),i=o.encrypt(s);return r.fill(0),{version:1,kdf:"scrypt",scrypt:ps,salt:ys(n),ciphertext:ys(i)}}async function $u(e,t){if(!e||e.version!==1||e.kdf!=="scrypt")throw new Error("Unsupported vault format");let n=$r(e.salt),r=$r(e.ciphertext),o=await ns(t,n,e.scrypt||ps),i=os(ds)(o).decrypt(r);o.fill(0);let c=lu.decode(i);return i.fill(0),JSON.parse(c)}function Hr(){g.root?.wipePrivateData&&g.root.wipePrivateData(),g.accountRoot?.wipePrivateData&&g.accountRoot.wipePrivateData(),g.root=null,g.accountRoot=null,g.mnemonic="",g.bip39Passphrase="",g.generatedMnemonic="",g.externalRecords=[],g.changeRecords=[],g.utxos=[],g.balance={confirmed:0n,unconfirmed:0n},g.explorerAddressInfo=null,g.explorerAddressTxs=[],g.selectedAddressDetail=null,g.nextExternalIndex=0,g.nextChangeIndex=0}async function Ss(e,t){let n=Qt(e.config||g.publicConfig);g.publicConfig=n,Un(n);let r=String(e.mnemonic||"").trim(),o=String(e.bip39Passphrase||"");if(!zn(r,ln))throw new Error("Invalid mnemonic");let s=Js(r,o),i=or.fromMasterSeed(s,gu(n));s.fill(0);let c=i.derive(xs(n));Hr(),g.root=i,g.accountRoot=c,g.masterFingerprint=i.fingerprint,g.mnemonic=r,g.bip39Passphrase=o,g.walletName=e.walletName||"Main wallet",g.unlocked=!0,await ks(),await Kr()}async function ks(){try{g.electrum?(g.electrum.close(),g.electrum=new Cr(g.publicConfig.electrumUrl)):g.electrum=new Cr(g.publicConfig.electrumUrl),await g.electrum.connect(),g.electrumConnected=!0,Z(`Electrum connected: ${JSON.stringify(g.electrum.serverInfo)}`,"ok")}catch(e){throw g.electrumConnected=!1,Z(`Electrum unavailable: ${e.message}`,"error"),e}finally{qe()}}async function Vc(e,t,n,r){let o=[],s=-1,i=0,c=0;for(;c<t.maxScan&&i<t.gapLimit;){let a=Es(g.accountRoot,e,c,t),[l,u]=await Promise.all([n.getHistory(a.scripthash).catch(()=>[]),n.listUnspent(a.scripthash).catch(()=>[])]);a.history=l,a.unspent=u,a.balance={confirmed:u.filter(f=>(f.height||0)>0).reduce((f,d)=>f+BigInt(d.value??0),0n),unconfirmed:u.filter(f=>(f.height||0)<=0).reduce((f,d)=>f+BigInt(d.value??0),0n)},o.push(a),yu(a)?(s=c,i=0):i++,r&&r(a),c++}return{records:o,lastUsed:s,nextIndex:s>=0?s+1:0}}function Ou(e,t,n){let r={txid:e.tx_hash,index:e.tx_pos,value:BigInt(e.value),height:e.height||0,address:t.address,branch:t.branch,derivationIndex:t.index,scripthash:t.scripthash,pubKey:t.pubKey,privKey:t.privKey,script:t.script,redeemScript:t.redeemScript,payment:t.payment,inputTemplate:null},o=bs(n);if(n.addressType==="p2wpkh")r.inputTemplate={witnessUtxo:{script:t.script,amount:r.value}};else if(n.addressType==="p2sh-p2wpkh"){let s=kn(t.pubKey,o);r.inputTemplate={witnessUtxo:{script:t.script,amount:r.value},redeemScript:s.script}}else r.inputTemplate={};return r}async function Cu(){if(!g.electrum||!g.accountRoot)throw new Error("Wallet is not ready");g.syncBusy=!0,qe();let e=g.publicConfig,[t,n]=await Promise.all([Vc(0,e,g.electrum),Vc(1,e,g.electrum)]);g.externalRecords=t.records,g.changeRecords=n.records,g.nextExternalIndex=t.nextIndex,g.nextChangeIndex=n.nextIndex;let r=[];for(let i of[...t.records,...n.records])for(let c of i.unspent)r.push(Ou(c,i,e));g.utxos=r;let o=r.reduce((i,c)=>((c.height||0)>0?i.confirmed+=c.value:i.unconfirmed+=c.value,i),{confirmed:0n,unconfirmed:0n});g.balance=o,await Ru();let s=Rr();s&&await Xc(s.address).catch(()=>{}),g.syncBusy=!1,Z(`Synced ${t.records.length} external and ${n.records.length} change addresses`,"ok")}async function Ru(){if(!g.electrum||!g.electrumConnected)return;let e=[...g.externalRecords,...g.changeRecords];for(let t of e)try{await g.electrum.subscribeScripthash(t.scripthash,()=>{g.pendingRefresh||(g.pendingRefresh=!0,setTimeout(async()=>{g.pendingRefresh=!1;try{await Kr()}catch(n){console.error(n)}},3e3))})}catch{}}async function Kr(){g.unlocked&&(g.electrum||await ks(),await Cu(),qe())}async function Xc(e){let t=Yc(g.publicConfig.explorerUrl);if(t){try{let[n,r]=await Promise.all([fetch(`${t}/ext/getbalance/${encodeURIComponent(e)}`).then(s=>s.json()),fetch(`${t}/ext/getaddresstxs/${encodeURIComponent(e)}/0/25`).then(s=>s.json())]),o=n&&typeof n=="object"?`${n.confirmed??n.balance??"0"} / ${n.unconfirmed??"0"}`:JSON.stringify(n);g.selectedAddressDetail={address:e,balanceText:o,rawBalance:n},g.explorerAddressTxs=Array.isArray(r)?r:r?.txs||r?.transactions||r?.data||[]}catch(n){console.warn("Explorer fetch failed",n),g.selectedAddressDetail={address:e,balanceText:"unavailable",rawBalance:null},g.explorerAddressTxs=[]}qe()}}async function Nu(){try{let e=jc(16),t=Qs(e,ln);g.generatedMnemonic=t,Z("Mnemonic generated. Write it down offline before creating the vault.","ok")}catch(e){Z(`Mnemonic generation failed: ${e.message}`,"error")}}async function _u(){try{let e=ee("generated-mnemonic").trim(),t=ee("setup-vault-password"),n=ee("setup-bip39-passphrase"),r=document.getElementById("setup-confirm")?.checked;if(!e)throw new Error("Generate a mnemonic first");if(!r)throw new Error("Confirm that you wrote the mnemonic offline");if(!t)throw new Error("Vault password is required");if(!zn(e,ln))throw new Error("Mnemonic is invalid");let o=Qt(vs());Un(o),g.publicConfig=o;let s=await Zc(t,{walletName:"Main wallet",mnemonic:e,bip39Passphrase:n,config:o});await Gc(s),g.generatedMnemonic="",await Ss({walletName:"Main wallet",mnemonic:e,bip39Passphrase:n,config:o},t),Z("Wallet created and unlocked successfully","ok")}catch(e){Z(`Create failed: ${e.message}`,"error")}}async function Hu(){try{let e=ee("restore-mnemonic").trim().replace(/\s+/g," "),t=ee("restore-vault-password"),n=ee("restore-bip39-passphrase");if(!e)throw new Error("Paste a mnemonic first");if(!t)throw new Error("Vault password is required");if(!zn(e,ln))throw new Error("Mnemonic is invalid");let r=Qt(vs());Un(r),g.publicConfig=r;let o=await Zc(t,{walletName:"Main wallet",mnemonic:e,bip39Passphrase:n,config:r});await Gc(o),await Ss({walletName:"Main wallet",mnemonic:e,bip39Passphrase:n,config:r},t),Z("Wallet restored and unlocked successfully","ok")}catch(e){Z(`Restore failed: ${e.message}`,"error")}}async function Ku(){try{let e=ee("unlock-password");if(!e)throw new Error("Password is required");let t=await Uu();if(!t)throw new Error("No vault found");let n=await $u(t,e);await Ss(n,e),Z("Vault unlocked","ok")}catch(e){Z(`Unlock failed: ${e.message}`,"error")}}async function Du(){try{await Lu(),Z("Vault deleted","ok"),g.unlocked=!1,Hr(),g.electrum&&g.electrum.close(),g.electrum=null,g.electrumConnected=!1,qe()}catch(e){Z(`Delete failed: ${e.message}`,"error")}}async function Mu(){try{g.electrum&&g.electrum.close(),g.electrum=null,g.electrumConnected=!1,g.unlocked=!1,Hr(),Z("Wallet locked","ok"),qe()}catch(e){Z(`Lock failed: ${e.message}`,"error")}}async function Wu(){try{hs(!0),await ks(),await Kr(),hs(!1)}catch(e){hs(!1),Z(`Refresh failed: ${e.message}`,"error")}}function Vu(e,t){let n=[],r=new Set;for(let o of e){let s=`${Or(o.txid)}:${o.index}`,i=t.get(s);if(!i||!i.privKey)continue;let c=ys(i.privKey);r.has(c)||(n.push(i.privKey),r.add(c))}return n}async function qu(e,t,n){let r=[];for(let o of e){let s=`${Or(o.txid)}:${o.index}`,i=t.get(s);if(!i)continue;let c={...o};if(n.addressType==="p2pkh"){if(!c.nonWitnessUtxo){let a=await g.electrum.getTransaction(Or(o.txid));c.nonWitnessUtxo=$r(a)}}else n.addressType==="p2sh-p2wpkh"&&!c.redeemScript&&i.redeemScript&&(c.redeemScript=i.redeemScript);r.push(c)}return r}async function zu(){try{if(!g.unlocked)throw new Error("Wallet is locked");if(!g.electrumConnected)throw new Error("Electrum is offline");let e=ee("send-to").trim(),t=ee("send-amount").trim(),n=Math.max(1,Be(ee("send-fee-rate"),g.publicConfig.feeRate));if(!e)throw new Error("Recipient address is required");let r=hu(t);if(r<=0n)throw new Error("Amount must be greater than zero");let o=g.publicConfig,s=bs(o),i=new Map;for(let w of g.utxos)i.set(`${Or(w.txid)}:${w.index}`,w);let c=g.utxos.map(w=>({txid:$r(w.txid),index:w.index,amount:w.value,...w.inputTemplate||{}}));c=await qu(c,i,o);let a=Fc();if(!a)throw new Error("No change address available");let l=es(c,[{address:e,amount:r}],"default",{changeAddress:a.address,feePerByte:BigInt(n),bip69:!0,createTx:!0,network:s});if(!l)throw new Error("Insufficient funds");let u=l.tx,f=Vu(u.inputs,i);for(let w of f)u.sign(w);u.finalize();let d=u.hex,h=u.id;if(!d||!h)throw new Error("Transaction finalization failed");let p=await g.electrum.broadcast(d);g.messageKind="send",g.message=`Broadcast success: ${p}`,g.nextChangeIndex+=1,Z(`Broadcast success: ${p}`,"ok"),await Kr()}catch(e){Z(`Send failed: ${e.message}`,"error")}}async function ju(){try{if(g.unlocked)throw new Error("Lock the wallet before changing network config");g.publicConfig=Qt(vs()),Un(g.publicConfig),Z("Configuration saved","ok")}catch(e){Z(`Config save failed: ${e.message}`,"error")}}async function Yu(){g.vaultExists=await Iu().catch(()=>!1),qe(),g.vaultExists?Z("Vault found. Unlock it, or create a new wallet if you want to replace it.","info"):Z("No vault found yet. Generate a mnemonic or restore an existing one.","info")}window.addEventListener("beforeunload",()=>{g.electrum&&g.electrum.close(),Hr()});Yu().catch(e=>{console.error(e),Z(`Startup failed: ${e.message}`,"error")});})();
+//# sourceMappingURL=app.js.map
